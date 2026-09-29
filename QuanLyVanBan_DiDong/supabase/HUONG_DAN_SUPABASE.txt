@@ -12,16 +12,19 @@ PHẦN A. TẠO KHO DỮ LIỆU TRÊN SUPABASE (khoảng 10 phút)
    Mở file supabase.sql (trong thư mục QuanLyVanBan_DiDong/supabase của repo trên GitHub),
    bấm "Raw", chọn hết, copy, dán vào SQL Editor, bấm Run. Thấy "Success" là xong.
    (Chạy lại nhiều lần cũng không sao.)
-3. Menu > Authentication > Users > Add user > Create new user:
-   nhập email và mật khẩu, TÍCH "Auto Confirm User", tạo. Mỗi người một tài khoản hoặc dùng chung một tài khoản.
-4. Authentication > Sign In / Providers (hoặc Settings) > Email:
-   TẮT "Allow new users to sign up" để người lạ không tự tạo tài khoản. Lưu lại.
+3. Thêm người được dùng. Chỉ email nằm trong bảng nhanvien mới xem và sửa được dữ liệu.
+   a) Authentication > Users > Add user > Create new user: nhập email, mật khẩu, TÍCH "Auto Confirm User".
+   b) SQL Editor > New query, chạy (thay email cho đúng):
+        insert into public.nhanvien (email) values ('email-cua-can-bo@gmail.com');
+   Mỗi người một tài khoản hoặc dùng chung một tài khoản. Muốn thu hồi quyền: xóa email khỏi bảng nhanvien.
+4. (Không bắt buộc) Authentication > Sign In / Providers > Email: tắt "Allow new users to sign up".
+   Dù bật hay tắt, người tự đăng ký vẫn không xem được dữ liệu vì email của họ không nằm trong bảng nhanvien.
 5. Project Settings > API: copy "Project URL" và "anon public" key.
-   (anon key là khóa công khai, an toàn vì dữ liệu chỉ mở cho người đã đăng nhập.)
+   (anon key là khóa công khai, an toàn vì dữ liệu chỉ mở cho email trong bảng nhanvien.)
 
 PHẦN B. ĐƯA TRANG WEB LÊN GITHUB PAGES (khoảng 5 phút)
 ------------------------------------------------------
-1. Trên GitHub mở repo, vào docs/config.js > biểu tượng cây bút > dán Project URL và anon key
+1. (Nếu chưa điền sẵn) Trên GitHub mở repo, vào docs/config.js > biểu tượng cây bút > dán Project URL và anon key
    vào giữa hai dấu nháy > Commit changes.
    (Bỏ qua bước này cũng được: lần đầu mở trên mỗi điện thoại, ứng dụng sẽ hỏi và nhớ lại.)
 2. Repo > Settings > Pages > Source: "Deploy from a branch" > Branch: main, thư mục /docs > Save.
