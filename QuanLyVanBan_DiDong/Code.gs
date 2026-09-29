@@ -71,7 +71,7 @@ var API_ = {
   ping: function () { return true; },
   getAll: function () { return docHet_(); },
   getInfo: function () {
-    return { sheetUrl: sheet_().getParent().getUrl(), email: emailNhan_(), gio: CAU_HINH.GIO_GUI, soNgay: CAU_HINH.SO_NGAY_NHAC };
+    return { sheetUrl: sheet_().getParent().getUrl(), email: emailNhan_(), gio: CAU_HINH.GIO_GUI, soNgay: CAU_HINH.SO_NGAY_NHAC, pass: !!CAU_HINH.MA_TRUY_CAP };
   },
   saveDoc: function (d) { return luu_(d); },
   setStatus: function (id, kq) {

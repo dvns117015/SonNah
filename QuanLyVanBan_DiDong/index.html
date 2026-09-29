@@ -262,7 +262,7 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
     <div class="paper" id="sgPaper"></div>
     <div id="sgResult"></div>
   </div></div>
-  <div class="s-foot"><div class="wrap"><button class="btn primary block" id="sgPdf">Tạo file PDF để in / gửi</button></div></div>
+  <div class="s-foot"><div class="wrap"><button class="btn primary block" id="sgPdf">Tạo file danh sách để in / gửi</button></div></div>
 </section>
 
 <!-- Cài đặt -->
@@ -281,6 +281,7 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
     <div class="group">
       <h4>Dữ liệu</h4>
       <a class="btn block" id="stSheet" href="#" target="_blank" rel="noopener">Mở Google Sheet (xuất Excel, in)</a>
+      <button class="btn block" id="stCsv" hidden>Tải danh sách Excel (CSV)</button>
       <button class="btn block" id="stLogout">Đăng xuất mã truy cập</button>
     </div>
     <div class="tip" id="stNote"></div>
@@ -347,7 +348,8 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
         }
         reject(new Error((r && r.error) || 'Lỗi không rõ'));
       };
-      if (window.DEMO_API) { window.DEMO_API(name, args || []).then(done, function (e) { reject(e); }); return; }
+      var local = window.APP_API || window.DEMO_API;
+      if (local) { local(name, args || []).then(done, function (e) { reject(e); }); return; }
       if (!(window.google && google.script && google.script.run)) { reject(new Error('Chưa kết nối được Google Apps Script')); return; }
       google.script.run.withSuccessHandler(done).withFailureHandler(function (e) { reject(new Error(e && e.message || String(e))); }).api(name, args || [], store('pass') || '');
     });
@@ -469,10 +471,17 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
     return new Promise(function (res) {
       var url = URL.createObjectURL(file), img = new Image();
       img.onload = function () {
-        var max = 1600, s = Math.min(1, max / Math.max(img.width, img.height));
-        var c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.78));
+        var limit = window.PHOTO_MAX_CHARS || 0, max = limit ? 1400 : 1600, q = limit ? 0.72 : 0.78, out = null, n = 0;
+        do {
+          var s = Math.min(1, max / Math.max(img.width, img.height));
+          var c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          out = c.toDataURL('image/jpeg', q);
+          if (q > 0.46) q -= 0.08; else max = Math.round(max * 0.85);
+          n++;
+        } while (limit && out.length > limit && n < 12);
+        URL.revokeObjectURL(url);
+        res(limit && out.length > limit ? null : out);
       };
       img.onerror = function () { URL.revokeObjectURL(url); res(null); };
       img.src = url;
@@ -635,26 +644,38 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
       var b = $('sgPdf'); b.disabled = true; b.textContent = 'Đang tạo PDF...';
       var html = '<div style="font-family:\'Times New Roman\',serif">' + signHtml(signFor, $('sgTitle').value, $('sgGroup').checked) + '</div>';
       rpc('htmlToPdf', [html, $('sgTitle').value]).then(function (r) {
-        $('sgResult').innerHTML = '<div class="result">Đã tạo file PDF trong Google Drive.<a href="' + esc(r.url) + '" target="_blank" rel="noopener">Mở file: ' + esc(r.name) + '</a><span class="tip" style="color:inherit;font-weight:400">Mở bằng tài khoản Google đã cài ứng dụng, rồi in hoặc chia sẻ.</span></div>';
-      }).catch(function (e) { toast(e.message); }).then(function () { b.disabled = false; b.textContent = 'Tạo file PDF để in / gửi'; });
+        $('sgResult').innerHTML = r.url
+          ? '<div class="result">Đã tạo file PDF trong Google Drive.<a href="' + esc(r.url) + '" target="_blank" rel="noopener">Mở file: ' + esc(r.name) + '</a><span class="tip" style="color:inherit;font-weight:400">Mở bằng tài khoản Google đã cài ứng dụng, rồi in hoặc chia sẻ.</span></div>'
+          : '<div class="result">Đã lưu file ' + esc(r.name) + '.<span class="tip" style="color:inherit;font-weight:400">Mở file đó trong trình duyệt, bấm nút "In danh sách" hoặc menu trình duyệt > In / Lưu PDF, hoặc gửi file qua Zalo.</span></div>';
+      }).catch(function (e) { toast(e.message); }).then(function () { b.disabled = false; b.textContent = 'Tạo file danh sách để in / gửi'; });
     };
     $('btnSet').onclick = function () {
       $('stDays').value = remDays();
       rpc('getInfo').then(function (i) {
-        info = i; $('stSheet').href = i.sheetUrl || '#';
-        $('stMail').textContent = 'Email nhắc việc gửi mỗi sáng lúc ' + i.gio + 'h tới: ' + i.email + ' (nhắc trước ' + i.soNgay + ' ngày, sửa trong Code.gs).';
+        info = i; $('stSheet').href = i.sheetUrl || '#'; $('stSheet').hidden = !i.sheetUrl;
+        $('stTest').hidden = !i.email; $('stLogout').hidden = !i.pass;
+        $('stMail').textContent = i.email ? 'Email nhắc việc gửi mỗi sáng lúc ' + i.gio + 'h tới: ' + i.email + ' (nhắc trước ' + i.soNgay + ' ngày, sửa trong Code.gs).' : 'Việc quá hạn và sắp đến hạn hiện ở khung nhắc màu đầu trang mỗi lần mở ứng dụng.';
         $('stNote').textContent = '';
       }).catch(function () { });
+      $('stCsv').hidden = !window.SAVE_FILE;
       show('scrSet');
     };
     $('stDays').onchange = function () { store('remDays', String(parseInt(this.value, 10) || 0)); renderAll(); };
     $('stTest').onclick = function () { rpc('guiThuNhacViec').then(function (m) { toast(m); }).catch(function (e) { toast(e.message); }); };
+    $('stCsv').onclick = function () {
+      var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+      var rows = [['STT', 'Số văn bản', 'Ngày văn bản', 'Ngày nhận', 'Trích yếu', 'Nội dung công việc', 'Ý kiến chỉ đạo', 'Cán bộ thực hiện', 'Hạn', 'Kết quả', 'Ghi chú kết quả', 'Ký nhận']];
+      filtered().forEach(function (d, i) { rows.push([i + 1, d.so_van_ban, vn(d.ngay_van_ban), vn(d.ngay_nhan), d.trich_yeu, d.noi_dung, d.y_kien_chi_dao, d.can_bo, vn(d.han), STATUS[d.ket_qua], d.ghi_chu_ket_qua, '']); });
+      window.SAVE_FILE('danh-sach-van-ban.csv', '\ufeff' + rows.map(function (r) { return r.map(q).join(','); }).join('\r\n')).catch(function (e) { if (e && e.code !== 'declined') toast('Không lưu được file'); });
+    };
     $('stLogout').onclick = function () { store('pass', null); toast('Đã đăng xuất. Lần sau sẽ hỏi lại mã.'); };
     document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
   }
 
+  window.__reload = function () { load(); };
   bind();
-  if (window.DEMO_API) { $('demoNote').hidden = false; $('demoNote').textContent = 'Bản xem thử: dữ liệu mẫu, lưu trong trình duyệt của bạn. Bản thật lưu vào Google Sheet.'; }
+  rpc('getInfo').then(function (i) { if (i && i.note) { $('demoNote').hidden = false; $('demoNote').textContent = i.note; } }).catch(function () { });
+  if (window.DEMO_API && !window.APP_API) { $('demoNote').hidden = false; $('demoNote').textContent = 'Bản xem thử: dữ liệu mẫu, lưu trong trình duyệt của bạn. Bản thật lưu vào Google Sheet.'; }
   load();
 })();
 </script>
