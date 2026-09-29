@@ -18,6 +18,8 @@
       D('v2', { so_van_ban: '48/KH-SNV', ngay_van_ban: iso(-6), ngay_nhan: iso(-5), trich_yeu: 'Kế hoạch tổ chức tập huấn công tác văn thư, lưu trữ', noi_dung: 'Chuẩn bị danh sách đại biểu và hội trường', y_kien_chi_dao: 'Giao Phòng Hành chính phối hợp, báo cáo lãnh đạo trước 1 tuần.', can_bo: 'Trần Thị Bình', han: iso(0), ket_qua: 'chua', ghi_chu_ket_qua: '', anh: [{ id: 's3', name: 'c' }] }),
       D('v3', { so_van_ban: '210/CV-STC', ngay_van_ban: iso(-4), ngay_nhan: iso(-3), trich_yeu: 'Đề nghị cung cấp số liệu dự toán ngân sách năm sau', noi_dung: '', y_kien_chi_dao: 'Kế toán tổng hợp, gửi Sở Tài chính đúng hạn.', can_bo: 'Lê Minh Cường, Trần Thị Bình', han: iso(2), ket_qua: 'chua', ghi_chu_ket_qua: '' }),
       D('v4', { so_van_ban: '07/TB-VP', ngay_van_ban: iso(-3), ngay_nhan: iso(-3), trich_yeu: 'Thông báo lịch họp giao ban tháng', noi_dung: 'Chuẩn bị nội dung báo cáo phòng mình', y_kien_chi_dao: 'Các phòng cử người dự họp.', can_bo: 'Nguyễn Văn An', han: iso(9), ket_qua: 'chua', ghi_chu_ket_qua: '' }),
+      D('v6', { loai: 'bctuan', so_van_ban: '', ngay_van_ban: '', ngay_nhan: iso(-4), trich_yeu: 'Báo cáo công tác tuần gửi lãnh đạo', noi_dung: 'Tổng hợp kết quả tuần của 3 phòng', y_kien_chi_dao: 'Gửi trước 16h thứ Sáu.', can_bo: 'Trần Thị Bình', han: iso(1), ket_qua: 'chua', ghi_chu_ket_qua: '' }),
+      D('v7', { loai: 'bcquy', so_van_ban: '', ngay_van_ban: '', ngay_nhan: iso(-15), trich_yeu: 'Báo cáo kết quả thực hiện nhiệm vụ quý III/2026', noi_dung: 'Thu thập số liệu, viết báo cáo', y_kien_chi_dao: 'Văn phòng tổng hợp, trình duyệt trước khi gửi Sở.', can_bo: 'Nguyễn Văn An', han: iso(6), ket_qua: 'dang', ghi_chu_ket_qua: 'Đã có dàn ý' }),
       D('v5', { so_van_ban: '33/QĐ-UBND', ngay_van_ban: iso(-20), ngay_nhan: iso(-18), trich_yeu: 'Quyết định kiện toàn Ban chỉ đạo chuyển đổi số', noi_dung: 'Phổ biến trong cơ quan', y_kien_chi_dao: 'Lưu hồ sơ, phổ biến đến toàn thể cán bộ.', can_bo: 'Lê Minh Cường', han: iso(-10), ket_qua: 'xong', ghi_chu_ket_qua: 'Đã phổ biến ngày họp giao ban' })
     ];
   }
@@ -29,11 +31,13 @@
     ping: function () { return true; },
     getAll: function () { return JSON.parse(JSON.stringify(db)); },
     getInfo: function () { return { sheetUrl: '', email: 'ban@example.com', gio: 7, soNgay: 3 }; },
+    getLoai: function () { try { var l = JSON.parse(localStorage.getItem(KEY + '-loai')); return l && l.length ? l : null; } catch (e) { return null; } },
+    saveLoai: function (list) { try { localStorage.setItem(KEY + '-loai', JSON.stringify(list)); } catch (e) { } return true; },
     saveDoc: function (d) {
-      if (!d.trich_yeu.trim() && !d.so_van_ban.trim()) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
+      if (!d.id && !String(d.trich_yeu || '').trim() && !String(d.so_van_ban || '').trim()) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
       var o;
-      if (d.id) o = find(d.id); else { o = { id: 'v' + Date.now(), anh: [], tao_luc: new Date().toISOString() }; db.push(o); }
-      ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua'].forEach(function (k) { o[k] = String(d[k] || '').trim(); });
+      if (d.id) o = find(d.id); else { o = { id: 'v' + Date.now(), anh: [], tao_luc: new Date().toISOString(), loai: 'vb', ket_qua: 'chua' }; db.push(o); }
+      ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau'].forEach(function (k) { if (d[k] !== undefined) o[k] = String(d[k]).trim(); });
       o.sua_luc = new Date().toISOString(); save(); return { id: o.id };
     },
     setStatus: function (id, k) { find(id).ket_qua = k; save(); return true; },

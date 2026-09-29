@@ -49,6 +49,17 @@ KHI SỬA MÃ (Code.gs hoặc index.html) SAU NÀY
   Phải Triển khai > Quản lý bản triển khai > biểu tượng bút > Phiên bản: "Phiên bản mới" > Triển khai.
   Link giữ nguyên. Nếu chỉ lưu mà không tạo phiên bản mới thì người dùng vẫn thấy bản cũ.
 
+PHÂN LOẠI VÀ BÁO CÁO ĐỊNH KỲ
+----------------------------
+  - Mỗi công việc có "Loại công việc": Văn bản thường, Báo cáo tuần / tháng / quý / 6 tháng / năm.
+  - Thẻ "Định kỳ" ở đầu danh sách chỉ hiện các báo cáo định kỳ. Bộ lọc có thêm lọc theo loại.
+  - Chọn loại có chu kỳ trong form thì hiện gợi ý hạn cuối kỳ (cuối tuần, tháng, quý...), bấm "Đặt hạn này".
+  - Khi đánh dấu một báo cáo định kỳ là "Đã xong", ứng dụng hỏi có tạo luôn công việc kỳ sau không
+    (hạn cộng thêm 1 tuần / 1 tháng / 3 tháng...). Mỗi báo cáo chỉ hỏi tạo một lần.
+  - Cài đặt > Phân loại công việc: thêm loại riêng (ví dụ "Báo cáo an toàn lao động") và chọn chu kỳ.
+  - Nếu đã cài bản cũ: dán lại Code.gs và index.html, chạy lại hàm caiDat (không mất dữ liệu),
+    rồi Triển khai phiên bản mới.
+
 LƯU Ý
 -----
   - Đừng xóa hoặc đổi thứ tự cột hàng tiêu đề trong tab VanBan. Có thể tô màu, thêm tab khác.

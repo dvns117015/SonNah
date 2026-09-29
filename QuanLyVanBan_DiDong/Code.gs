@@ -14,12 +14,12 @@ var CAU_HINH = {
 
 var TEN_TAB = 'VanBan';
 var COLS = ['id', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao',
-  'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'anh', 'tao_luc', 'sua_luc'];
+  'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'anh', 'tao_luc', 'sua_luc', 'loai', 'ky_sau'];
 var TIEU_DE = ['ID', 'Số văn bản', 'Ngày văn bản', 'Ngày nhận', 'Trích yếu', 'Nội dung công việc', 'Ý kiến chỉ đạo',
-  'Cán bộ thực hiện', 'Hạn', 'Kết quả', 'Ghi chú kết quả', 'Ảnh (mã file Drive)', 'Tạo lúc', 'Sửa lúc'];
+  'Cán bộ thực hiện', 'Hạn', 'Kết quả', 'Ghi chú kết quả', 'Ảnh (mã file Drive)', 'Tạo lúc', 'Sửa lúc', 'Phân loại (mã)', 'Công việc kỳ sau (mã)'];
 var KET_QUA = { chua: 'Chưa xong', dang: 'Đang thực hiện', xong: 'Đã xong', huy: 'Không thực hiện' };
 var TU_KHOA_EDIT = ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao',
-  'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua'];
+  'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau'];
 
 // ====== Chạy 1 lần từ trình soạn thảo: tạo tab, thư mục ảnh, lịch nhắc việc ======
 function caiDat() {
@@ -74,6 +74,22 @@ var API_ = {
     return { sheetUrl: sheet_().getParent().getUrl(), email: emailNhan_(), gio: CAU_HINH.GIO_GUI, soNgay: CAU_HINH.SO_NGAY_NHAC, pass: !!CAU_HINH.MA_TRUY_CAP };
   },
   saveDoc: function (d) { return luu_(d); },
+  getLoai: function () {
+    var s = PropertiesService.getScriptProperties().getProperty('LOAI');
+    try { var l = JSON.parse(s); return (l && l.length) ? l : null; } catch (e) { return null; }
+  },
+  saveLoai: function (list) {
+    var ok = { '': 1, tuan: 1, thang: 1, quy: 1, '6thang': 1, nam: 1 };
+    if (!list || !list.length || list.length > 60) throw new Error('Danh sách loại không hợp lệ');
+    var clean = list.map(function (x) {
+      var name = String(x.name || '').trim().slice(0, 60), id = String(x.id || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 30);
+      if (!name || !id) throw new Error('Tên loại không hợp lệ');
+      return { id: id, name: name, ky: ok[x.ky || ''] ? (x.ky || '') : '' };
+    });
+    if (!clean.some(function (x) { return x.id === 'vb'; })) throw new Error('Phải giữ loại "Văn bản thường"');
+    PropertiesService.getScriptProperties().setProperty('LOAI', JSON.stringify(clean));
+    return true;
+  },
   setStatus: function (id, kq) {
     if (!KET_QUA[kq]) throw new Error('Kết quả không hợp lệ');
     return voiKhoa_(function () {
@@ -198,6 +214,7 @@ function docHet_() {
     if (!KET_QUA[o.ket_qua]) o.ket_qua = 'chua';
     try { o.anh = JSON.parse(o.anh || '[]'); } catch (e) { o.anh = []; }
     o.tao_luc = String(o.tao_luc); o.sua_luc = String(o.sua_luc);
+    o.loai = String(o.loai || 'vb'); o.ky_sau = String(o.ky_sau || '');
     return o;
   });
 }
@@ -212,16 +229,21 @@ function layAnh_(sh, r) {
 function luu_(d) {
   return voiKhoa_(function () {
     var sh = sheet_(), row = {}, t = bayGio_();
-    TU_KHOA_EDIT.forEach(function (k) { row[k] = String(d[k] == null ? '' : d[k]).trim(); });
-    ['ngay_van_ban', 'ngay_nhan', 'han'].forEach(function (k) { row[k] = chuoiNgay_(row[k]); });
-    if (!KET_QUA[row.ket_qua]) row.ket_qua = 'chua';
-    if (!row.trich_yeu && !row.so_van_ban) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
+    TU_KHOA_EDIT.forEach(function (k) { if (d[k] !== undefined) row[k] = String(d[k] == null ? '' : d[k]).trim(); });
+    ['ngay_van_ban', 'ngay_nhan', 'han'].forEach(function (k) { if (k in row) row[k] = chuoiNgay_(row[k]); });
+    if ('ket_qua' in row && !KET_QUA[row.ket_qua]) row.ket_qua = 'chua';
+    if ('loai' in row && !row.loai) row.loai = 'vb';
     if (d.id) {
+      if ('so_van_ban' in row && 'trich_yeu' in row && !row.trich_yeu && !row.so_van_ban) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
       var r = timDong_(sh, d.id);
-      TU_KHOA_EDIT.forEach(function (k) { sh.getRange(r, COLS.indexOf(k) + 1).setValue(row[k]); });
+      Object.keys(row).forEach(function (k) { sh.getRange(r, COLS.indexOf(k) + 1).setValue(row[k]); });
       sh.getRange(r, COLS.indexOf('sua_luc') + 1).setValue(t);
       return { id: String(d.id) };
     }
+    TU_KHOA_EDIT.forEach(function (k) { if (!(k in row)) row[k] = ''; });
+    if (!row.ket_qua) row.ket_qua = 'chua';
+    if (!row.loai) row.loai = 'vb';
+    if (!row.trich_yeu && !row.so_van_ban) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
     var id = 'v' + new Date().getTime();
     var vals = COLS.map(function (c) {
       if (c === 'id') return id;

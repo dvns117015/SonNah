@@ -28,7 +28,7 @@
   userP.then(function (u) { if (u) u.can('data.write').then(function (v) { if (v === false) readOnly = true; }); });
 
   function need() { if (!DB) throw new Error(snapErr || 'Không kết nối được kho dữ liệu'); return DB; }
-  var TEXT = ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua'];
+  var TEXT = ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau'];
   var KQ = { chua: 1, dang: 1, xong: 1, huy: 1 };
   function now() { return new Date().toISOString(); }
 
@@ -37,14 +37,35 @@
     getInfo: function () { return { sheetUrl: '', email: '', gio: 0, soNgay: 3, pass: false, note: readOnly ? NOTE_RO : (snapErr || '') }; },
     saveDoc: function (d) {
       var db = need(), o = {};
-      TEXT.forEach(function (k) { o[k] = String(d[k] == null ? '' : d[k]).trim(); });
-      if (!KQ[o.ket_qua]) o.ket_qua = 'chua';
+      TEXT.forEach(function (k) { if (d[k] !== undefined) o[k] = String(d[k] == null ? '' : d[k]).trim(); });
+      if ('ket_qua' in o && !KQ[o.ket_qua]) o.ket_qua = 'chua';
+      if ('loai' in o && !o.loai) o.loai = 'vb';
+      if (d.id) {
+        if ('so_van_ban' in o && 'trich_yeu' in o && !o.so_van_ban && !o.trich_yeu) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
+        o.sua_luc = now();
+        return db.doc('docs/' + d.id).update(o).then(function () { return { id: d.id }; });
+      }
+      TEXT.forEach(function (k) { if (!(k in o)) o[k] = ''; });
+      if (!o.ket_qua) o.ket_qua = 'chua';
+      if (!o.loai) o.loai = 'vb';
       if (!o.trich_yeu && !o.so_van_ban) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
-      o.sua_luc = now();
-      if (d.id) return db.doc('docs/' + d.id).update(o).then(function () { return { id: d.id }; });
-      o.anh = []; o.tao_luc = o.sua_luc;
+      o.sua_luc = now(); o.anh = []; o.tao_luc = o.sua_luc;
       var ref = db.collection('docs').doc();
       return ref.set(o).then(function () { return { id: ref.id }; });
+    },
+    getLoai: function () {
+      return need().doc('config/loai').get().then(function (s) { var l = s.exists && s.data().list; return (l && l.length) ? l : null; });
+    },
+    saveLoai: function (list) {
+      var ok = { '': 1, tuan: 1, thang: 1, quy: 1, '6thang': 1, nam: 1 };
+      if (!list || !list.length || list.length > 60) throw new Error('Danh sách loại không hợp lệ');
+      var clean = list.map(function (x) {
+        var name = String(x.name || '').trim().slice(0, 60), id = String(x.id || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 30);
+        if (!name || !id) throw new Error('Tên loại không hợp lệ');
+        return { id: id, name: name, ky: ok[x.ky || ''] ? (x.ky || '') : '' };
+      });
+      if (!clean.some(function (x) { return x.id === 'vb'; })) throw new Error('Phải giữ loại "Văn bản thường"');
+      return need().doc('config/loai').set({ list: clean }).then(function () { return true; });
     },
     setStatus: function (id, k) { if (!KQ[k]) throw new Error('Kết quả không hợp lệ'); return need().doc('docs/' + id).update({ ket_qua: k, sua_luc: now() }).then(function () { return true; }); },
     deleteDoc: function (id) {
