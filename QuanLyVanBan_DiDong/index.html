@@ -290,10 +290,8 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
     <div class="group">
       <h4>Phân loại công việc</h4>
       <div id="stLoai"></div>
-      <div class="tip">Loại có chu kỳ (tuần, tháng, quý...) sẽ gợi ý hạn cuối kỳ và hỏi tạo công việc kỳ sau khi bạn đánh dấu Đã xong.</div>
-      <label class="f">Thêm loại mới<input class="field" id="lnName" placeholder="Ví dụ: Báo cáo an toàn lao động" autocomplete="off"></label>
-      <label class="f">Chu kỳ<select class="field" id="lnKy"></select></label>
-      <button class="btn block" id="lnAdd">Thêm loại</button>
+      <div class="tip">Đặt lịch cho báo cáo định kỳ: hàng tuần vào thứ mấy, hàng tháng vào ngày nào, hàng quý, 6 tháng, hàng năm. Có thể bật tự tạo công việc trước hạn.</div>
+      <button class="btn block" id="lnAdd">Thêm loại mới</button>
     </div>
     <div class="group">
       <h4>Dữ liệu</h4>
@@ -303,6 +301,30 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
     </div>
     <div class="tip" id="stNote"></div>
   </div></div>
+</section>
+
+<!-- Sửa loại công việc -->
+<section class="screen" id="scrLoai" hidden>
+  <div class="s-head"><div class="wrap"><div class="bar-row">
+    <button class="ib" data-close="scrLoai" aria-label="Quay lại"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <h2 id="lHead">Loại công việc</h2>
+  </div></div></div>
+  <div class="wrap"><div class="s-body">
+    <div class="group">
+      <label class="f">Tên loại<input class="field" id="lName" autocomplete="off" placeholder="Ví dụ: Báo cáo an toàn lao động"></label>
+      <label class="f">Chu kỳ<select class="field" id="lKy"></select></label>
+      <div id="lSched" style="display:grid;gap:12px"></div>
+      <div class="hint" id="lPrev" hidden></div>
+    </div>
+    <div class="group" id="lMore">
+      <label class="f">Cán bộ phụ trách mặc định<input class="field" id="lCb" list="dlCb" autocomplete="off"></label>
+      <label style="display:flex;gap:10px;align-items:center"><input class="chk" type="checkbox" id="lAuto"> Tự tạo công việc trước hạn</label>
+      <label class="f" id="lTruocWrap">Tạo trước hạn (ngày)<input class="field" id="lTruoc" type="number" min="0" max="60" inputmode="numeric" value="7"></label>
+      <div class="tip">Khi bật, mỗi lần mở ứng dụng sẽ tự tạo công việc cho các hạn sắp tới nếu chưa có. Nếu bạn xóa một công việc tự tạo còn trong thời gian này, nó sẽ được tạo lại.</div>
+    </div>
+    <button class="btn danger block" id="lDel" hidden>Xóa loại này</button>
+  </div></div>
+  <div class="s-foot"><div class="wrap"><button class="btn primary block" id="lSave">Lưu loại</button></div></div>
 </section>
 
 <datalist id="dlCb"></datalist>
@@ -320,8 +342,9 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
   var STATUS = { chua: 'Chưa xong', dang: 'Đang thực hiện', xong: 'Đã xong', huy: 'Không thực hiện' };
   var FIELDS = ['loai', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua'];
   var KY = { '': 'Không định kỳ', tuan: 'Hàng tuần', thang: 'Hàng tháng', quy: 'Hàng quý', '6thang': '6 tháng một lần', nam: 'Hàng năm' };
-  var DEFAULT_LOAI = [{ id: 'vb', name: 'Văn bản thường', ky: '' }, { id: 'bctuan', name: 'Báo cáo tuần', ky: 'tuan' }, { id: 'bcthang', name: 'Báo cáo tháng', ky: 'thang' }, { id: 'bcquy', name: 'Báo cáo quý', ky: 'quy' }, { id: 'bc6thang', name: 'Báo cáo 6 tháng', ky: '6thang' }, { id: 'bcnam', name: 'Báo cáo năm', ky: 'nam' }];
-  var loai = DEFAULT_LOAI.slice();
+  var THU = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  var DEFAULT_LOAI = [{ id: 'vb', name: 'Văn bản thường', ky: '' }, { id: 'bctuan', name: 'Báo cáo tuần', ky: 'tuan', ngay: 5 }, { id: 'bcthang', name: 'Báo cáo tháng', ky: 'thang', ngay: 0 }, { id: 'bcquy', name: 'Báo cáo quý', ky: 'quy', thang: 3, ngay: 0 }, { id: 'bc6thang', name: 'Báo cáo 6 tháng', ky: '6thang', thang: 6, ngay: 0 }, { id: 'bcnam', name: 'Báo cáo năm', ky: 'nam', thang: 12, ngay: 0 }];
+    var loai = DEFAULT_LOAI.slice();
   var docs = [], info = {}, photoCache = {};
   var F = { tab: 'all', q: '', loai: '', cb: '', hanTu: '', hanDen: '', nhanTu: '', nhanDen: '' };
   var selectMode = false, selected = {}, signFor = null, curId = null;
@@ -337,22 +360,44 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
   function loaiOf(id) { for (var i = 0; i < loai.length; i++) if (loai[i].id === (id || 'vb')) return loai[i]; return { id: id, name: '(loại đã xóa)', ky: '' }; }
   function isBuiltin(id) { return DEFAULT_LOAI.some(function (x) { return x.id === id; }); }
   function parseIso(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
-  function addMonths(s, n) {
-    var d = parseIso(s), day = d.getDate(), last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    var t = new Date(d.getFullYear(), d.getMonth() + n, 1), tl = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
-    t.setDate(day === last ? tl : Math.min(day, tl)); return iso(t);
+  function addDays(s, n) { var d = parseIso(s); d.setDate(d.getDate() + n); return iso(d); }
+  // Lịch của một loại: tuần = thứ (0 = Chủ nhật), còn lại = ngày trong tháng (0 = cuối tháng) và tháng thứ mấy trong kỳ
+  function sched(c) {
+    var def = { tuan: { ngay: 5 }, thang: { ngay: 0 }, quy: { ngay: 0, thang: 3 }, '6thang': { ngay: 0, thang: 6 }, nam: { ngay: 0, thang: 12 } }[c.ky] || {};
+    var ngay = (c.ngay === undefined || c.ngay === null || c.ngay === '') ? def.ngay : +c.ngay;
+    return { ngay: ngay, thang: c.thang ? +c.thang : def.thang, auto: !!c.auto, truoc: (c.truoc === undefined || c.truoc === null || c.truoc === '') ? 7 : +c.truoc };
   }
-  function addPeriod(s, ky) {
-    if (ky === 'tuan') { var d = parseIso(s); d.setDate(d.getDate() + 7); return iso(d); }
-    return addMonths(s, { thang: 1, quy: 3, '6thang': 6, nam: 12 }[ky] || 1);
+  function occurrences(c, fromIso, toIso) {
+    var s = sched(c), out = [], f = parseIso(fromIso), t = parseIso(toIso);
+    if (c.ky === 'tuan') { for (var d = new Date(f); d <= t; d.setDate(d.getDate() + 1)) if (d.getDay() === s.ngay) out.push(iso(d)); return out; }
+    var per = { thang: 1, quy: 3, '6thang': 6, nam: 12 }[c.ky];
+    if (!per) return out;
+    var cur = new Date(f.getFullYear(), f.getMonth(), 1);
+    while (cur <= t) {
+      var m = cur.getMonth();
+      if (per === 1 || (per === 12 ? m === s.thang - 1 : m % per === s.thang - 1)) {
+        var last = new Date(cur.getFullYear(), m + 1, 0).getDate();
+        var ds = iso(new Date(cur.getFullYear(), m, s.ngay === 0 ? last : Math.min(s.ngay, last)));
+        if (ds >= fromIso && ds <= toIso) out.push(ds);
+      }
+      cur = new Date(cur.getFullYear(), m + 1, 1);
+    }
+    return out;
   }
-  function endOfPeriod(ky) {
-    var t = new Date(), y = t.getFullYear(), m = t.getMonth();
-    if (ky === 'tuan') { t.setDate(t.getDate() + (7 - t.getDay()) % 7); return iso(t); }
-    if (ky === 'thang') return iso(new Date(y, m + 1, 0));
-    if (ky === 'quy') return iso(new Date(y, Math.floor(m / 3) * 3 + 3, 0));
-    if (ky === '6thang') return iso(new Date(y, m < 6 ? 6 : 12, 0));
-    return iso(new Date(y, 12, 0));
+  function nextOcc(c, fromIso) { return occurrences(c, fromIso, addDays(fromIso, 800))[0] || ''; }
+  function summary(c) {
+    if (!c.ky) return 'Không định kỳ';
+    var s = sched(c), t;
+    if (c.ky === 'tuan') t = 'Hàng tuần, hạn ' + THU[s.ngay];
+    else {
+      var day = s.ngay === 0 ? 'cuối tháng' : 'ngày ' + s.ngay;
+      if (c.ky === 'thang') t = 'Hàng tháng, hạn ' + day;
+      else if (c.ky === 'nam') t = 'Hàng năm, hạn ' + (s.ngay === 0 ? 'cuối' : 'ngày ' + s.ngay) + ' tháng ' + s.thang;
+      else t = KY[c.ky] + ', hạn ' + day + ' của tháng thứ ' + s.thang;
+    }
+    if (s.auto) t += ', tự tạo trước ' + s.truoc + ' ngày';
+    if (c.can_bo) t += ', ' + c.can_bo;
+    return t;
   }
   function isOpen(d) { return d.ket_qua === 'chua' || d.ket_qua === 'dang'; }
   function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } return null; }
@@ -399,7 +444,7 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
   function load() {
     return Promise.all([rpc('getAll'), rpc('getLoai').catch(function () { return null; })]).then(function (r) {
       docs = r[0]; docs.forEach(function (d) { if (!d.loai) d.loai = 'vb'; });
-      loai = (r[1] && r[1].length) ? r[1] : DEFAULT_LOAI.slice(); renderAll();
+      loai = (r[1] && r[1].length) ? r[1] : DEFAULT_LOAI.slice(); renderAll(); ensureAuto();
     }).catch(function (e) { $('list').innerHTML = '<div class="empty">Không tải được dữ liệu.<br>' + esc(e.message) + '</div>'; });
   }
   function matches(d) {
@@ -471,34 +516,113 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
     var cur = $('loai').value, curF = $('flLoai').value;
     $('loai').innerHTML = opts; $('flLoai').innerHTML = '<option value="">Tất cả loại</option>' + opts;
     $('loai').value = cur || 'vb'; $('flLoai').value = F.loai || curF || '';
-    $('lnKy').innerHTML = Object.keys(KY).map(function (k) { return '<option value="' + k + '">' + KY[k] + '</option>'; }).join('');
   }
   function updateHint() {
     var c = loaiOf($('loai').value), box = $('loaiHint');
     if (!c.ky) { box.hidden = true; return; }
-    var e = endOfPeriod(c.ky);
-    box.hidden = false;
-    box.innerHTML = '<span style="flex:1">' + esc(KY[c.ky]) + '. Cuối kỳ này: <b>' + vn(e) + '</b></span><button type="button" class="btn" id="hintBtn">Đặt hạn này</button>';
+    var e = nextOcc(c, todayStr());
+    box.hidden = !e;
+    if (e) box.innerHTML = '<span style="flex:1">Hạn theo lịch: <b>' + esc(THU[parseIso(e).getDay()]) + ' ' + vn(e) + '</b></span><button type="button" class="btn" id="hintBtn">Đặt hạn này</button>';
   }
   function renderLoaiList() {
     $('stLoai').innerHTML = loai.map(function (x) {
-      return '<div class="lrow"><span>' + esc(x.name) + '<small>' + esc(KY[x.ky || '']) + '</small></span>' + (isBuiltin(x.id) ? '' : '<button class="btn" data-delloai="' + esc(x.id) + '">Xóa</button>') + '</div>';
+      return '<div class="lrow"><span>' + esc(x.name) + '<small>' + esc(summary(x)) + '</small></span><button class="btn" data-editloai="' + esc(x.id) + '">Sửa</button></div>';
     }).join('');
   }
   function saveLoai(list, okMsg) {
-    return rpc('saveLoai', [list]).then(function () { loai = list; renderAll(); renderLoaiList(); toast(okMsg); }).catch(function (e) { toast(e.message); });
+    return rpc('saveLoai', [list]).then(function () { loai = list; renderAll(); renderLoaiList(); toast(okMsg); return true; }).catch(function (e) { toast(e.message); return false; });
+  }
+  // --- sửa / thêm loại công việc ---
+  var editLoai = null;
+  function renderSched(ky, vals) {
+    var box = $('lSched'), v = sched({ ky: ky, ngay: vals && vals.ngay, thang: vals && vals.thang }), h = '';
+    var days = '<option value="0">Cuối tháng</option>';
+    for (var i = 1; i <= 31; i++) days += '<option value="' + i + '">Ngày ' + i + '</option>';
+    if (ky === 'tuan') {
+      h = '<label class="f">Hạn vào<select class="field" id="lThu">' + [1, 2, 3, 4, 5, 6, 0].map(function (k) { return '<option value="' + k + '">' + THU[k] + ' hàng tuần</option>'; }).join('') + '</select></label>';
+    } else if (ky) {
+      var n = { thang: 0, quy: 3, '6thang': 6, nam: 12 }[ky];
+      if (n) {
+        h += '<label class="f">' + (ky === 'nam' ? 'Tháng' : 'Tháng thứ mấy trong kỳ') + '<select class="field" id="lThang">';
+        for (var m = 1; m <= n; m++) h += '<option value="' + m + '">' + (ky === 'nam' ? 'Tháng ' + m : 'Tháng thứ ' + m + (ky === 'quy' ? ' của quý' : ' của nửa năm')) + '</option>';
+        h += '</select></label>';
+      }
+      h += '<label class="f">Ngày hạn<select class="field" id="lNgay">' + days + '</select></label>';
+    }
+    box.innerHTML = h;
+    if ($('lThu')) $('lThu').value = v.ngay;
+    if ($('lThang')) $('lThang').value = v.thang;
+    if ($('lNgay')) $('lNgay').value = v.ngay;
+    $('lMore').hidden = !ky;
+    updatePrev();
+  }
+  function readLoaiForm() {
+    var ky = $('lKy').value, c = { id: editLoai || '', name: $('lName').value.trim(), ky: ky };
+    if (ky) {
+      if (ky === 'tuan') c.ngay = +$('lThu').value; else c.ngay = +$('lNgay').value;
+      if ($('lThang')) c.thang = +$('lThang').value;
+      c.auto = $('lAuto').checked; c.truoc = Math.max(0, Math.min(60, parseInt($('lTruoc').value, 10) || 0)); c.can_bo = $('lCb').value.trim();
+    }
+    return c;
+  }
+  function updatePrev() {
+    var c = readLoaiForm(), box = $('lPrev');
+    $('lTruocWrap').hidden = !$('lAuto').checked;
+    if (!c.ky) { box.hidden = true; return; }
+    var l = occurrences(c, todayStr(), addDays(todayStr(), 800)).slice(0, 3);
+    box.hidden = false;
+    box.innerHTML = 'Các hạn sắp tới: <b>' + l.map(function (x) { return (c.ky === 'tuan' ? '' : THU[parseIso(x).getDay()] + ' ') + vn(x); }).join(' · ') + '</b>';
+  }
+  function openLoai(id) {
+    editLoai = id || null;
+    var c = id ? loaiOf(id) : { id: '', name: '', ky: 'thang' }, s = sched(c);
+    $('lHead').textContent = id ? 'Sửa loại công việc' : 'Thêm loại công việc';
+    $('lName').value = c.name; $('lName').readOnly = id === 'vb';
+    $('lKy').innerHTML = Object.keys(KY).map(function (k) { return '<option value="' + k + '">' + KY[k] + '</option>'; }).join('');
+    $('lKy').value = c.ky; $('lKy').disabled = id === 'vb';
+    $('lCb').value = c.can_bo || ''; $('lAuto').checked = !!c.auto; $('lTruoc').value = s.truoc;
+    renderSched(c.ky, { ngay: c.ngay, thang: c.thang });
+    $('lDel').hidden = !id || isBuiltin(id);
+    show('scrLoai');
+  }
+  function saveLoaiForm() {
+    var c = readLoaiForm();
+    if (!c.name) { toast('Nhập tên loại'); return; }
+    if (loai.some(function (x) { return x.id !== editLoai && x.name.toLowerCase() === c.name.toLowerCase(); })) { toast('Đã có loại này'); return; }
+    var list;
+    if (editLoai) list = loai.map(function (x) { return x.id === editLoai ? c : x; });
+    else { c.id = 'c' + Date.now().toString(36); list = loai.concat([c]); }
+    saveLoai(list, 'Đã lưu loại').then(function (ok) { if (ok) { hide('scrLoai'); ensureAuto(); } });
   }
   function offerNext(d) {
     var c = loaiOf(d.loai);
-    if (!c.ky || d.ky_sau) return;
-    var next = addPeriod(d.han || todayStr(), c.ky);
+    if (!c.ky || d.ky_sau || sched(c).auto) return;
+    var t = todayStr(), next = nextOcc(c, d.han && d.han > t ? addDays(d.han, 1) : t);
+    if (!next) return;
     ask('Đã xong "' + (d.trich_yeu || d.so_van_ban) + '". Tạo luôn công việc kỳ sau (' + c.name + ', hạn ' + vn(next) + ')?', 'Tạo').then(function (ok) {
       if (!ok) return;
-      rpc('saveDoc', [{ so_van_ban: '', ngay_van_ban: '', ngay_nhan: todayStr(), trich_yeu: d.trich_yeu, noi_dung: d.noi_dung, y_kien_chi_dao: d.y_kien_chi_dao, can_bo: d.can_bo, han: next, ket_qua: 'chua', ghi_chu_ket_qua: '', loai: d.loai }])
+      rpc('saveDoc', [{ so_van_ban: '', ngay_van_ban: '', ngay_nhan: todayStr(), trich_yeu: d.trich_yeu, noi_dung: d.noi_dung, y_kien_chi_dao: d.y_kien_chi_dao, can_bo: d.can_bo || c.can_bo || '', han: next, ket_qua: 'chua', ghi_chu_ket_qua: '', loai: d.loai }])
         .then(function (r) { return rpc('saveDoc', [{ id: d.id, ky_sau: r.id }]); })
         .then(load).then(function () { toast('Đã tạo công việc kỳ sau, hạn ' + vn(next)); })
         .catch(function (e) { toast(e.message); });
     });
+  }
+  // Tự tạo công việc cho các hạn sắp tới (mã cố định nên nhiều máy mở cùng lúc cũng không bị trùng)
+  var autoTried = {};
+  function ensureAuto() {
+    var today = todayStr(), jobs = [];
+    loai.forEach(function (c) {
+      if (!c.ky || !sched(c).auto) return;
+      occurrences(c, today, addDays(today, sched(c).truoc)).forEach(function (h) {
+        var id = 'auto-' + c.id + '-' + h;
+        if (autoTried[id]) return;
+        if (docs.some(function (d) { return d.id === id || (d.loai === c.id && d.han === h); })) return;
+        autoTried[id] = 1;
+        jobs.push({ newId: id, so_van_ban: '', ngay_van_ban: '', ngay_nhan: today, trich_yeu: c.name + ' (hạn ' + vn(h) + ')', noi_dung: '', y_kien_chi_dao: '', can_bo: c.can_bo || '', han: h, ket_qua: 'chua', ghi_chu_ket_qua: '', loai: c.id });
+      });
+    });
+    if (!jobs.length) return;
+    jobs.reduce(function (p, j) { return p.then(function () { return rpc('createAuto', [j]).catch(function () { }); }); }, Promise.resolve()).then(load);
   }
   function renderCb() {
     var set = {};
@@ -671,19 +795,18 @@ label.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
     $('camera').onchange = function () { addFiles(this.files); this.value = ''; };
     $('gallery').onchange = function () { addFiles(this.files); this.value = ''; };
     $('fSave').onclick = saveForm;
-    $('loai').onchange = updateHint;
-    $('loaiHint').onclick = function (e) { if (e.target.id === 'hintBtn') $('han').value = endOfPeriod(loaiOf($('loai').value).ky); };
-    $('lnAdd').onclick = function () {
-      var name = $('lnName').value.trim();
-      if (!name) { toast('Nhập tên loại'); return; }
-      if (loai.some(function (x) { return x.name.toLowerCase() === name.toLowerCase(); })) { toast('Đã có loại này'); return; }
-      saveLoai(loai.concat([{ id: 'c' + Date.now().toString(36), name: name, ky: $('lnKy').value }]), 'Đã thêm loại').then(function () { $('lnName').value = ''; });
-    };
-    $('stLoai').onclick = function (e) {
-      var id = e.target.getAttribute('data-delloai'); if (!id) return;
-      var n = docs.filter(function (d) { return d.loai === id; }).length;
+    $('loai').onchange = function () { updateHint(); var c = loaiOf(this.value); if (c.can_bo && !$('can_bo').value.trim()) $('can_bo').value = c.can_bo; };
+    $('loaiHint').onclick = function (e) { if (e.target.id === 'hintBtn') $('han').value = nextOcc(loaiOf($('loai').value), todayStr()); };
+    $('lnAdd').onclick = function () { openLoai(null); };
+    $('stLoai').onclick = function (e) { var id = e.target.getAttribute('data-editloai'); if (id) openLoai(id); };
+    $('lKy').onchange = function () { renderSched(this.value, {}); };
+    $('lSched').onchange = updatePrev;
+    $('lAuto').onchange = updatePrev;
+    $('lSave').onclick = saveLoaiForm;
+    $('lDel').onclick = function () {
+      var id = editLoai, n = docs.filter(function (d) { return d.loai === id; }).length;
       ask('Xóa loại "' + loaiOf(id).name + '"?' + (n ? ' ' + n + ' văn bản đang dùng sẽ hiện là "(loại đã xóa)".' : ''), 'Xóa', true).then(function (ok) {
-        if (ok) saveLoai(loai.filter(function (x) { return x.id !== id; }), 'Đã xóa loại');
+        if (ok) saveLoai(loai.filter(function (x) { return x.id !== id; }), 'Đã xóa loại').then(function (done) { if (done) hide('scrLoai'); });
       });
     };
     $('fKq').onclick = function (e) { var k = e.target.getAttribute('data-kq'); if (k) { form.kq = k; renderKq(); } };

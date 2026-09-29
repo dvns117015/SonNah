@@ -51,12 +51,18 @@ KHI SỬA MÃ (Code.gs hoặc index.html) SAU NÀY
 
 PHÂN LOẠI VÀ BÁO CÁO ĐỊNH KỲ
 ----------------------------
-  - Mỗi công việc có "Loại công việc": Văn bản thường, Báo cáo tuần / tháng / quý / 6 tháng / năm.
-  - Thẻ "Định kỳ" ở đầu danh sách chỉ hiện các báo cáo định kỳ. Bộ lọc có thêm lọc theo loại.
-  - Chọn loại có chu kỳ trong form thì hiện gợi ý hạn cuối kỳ (cuối tuần, tháng, quý...), bấm "Đặt hạn này".
-  - Khi đánh dấu một báo cáo định kỳ là "Đã xong", ứng dụng hỏi có tạo luôn công việc kỳ sau không
-    (hạn cộng thêm 1 tuần / 1 tháng / 3 tháng...). Mỗi báo cáo chỉ hỏi tạo một lần.
-  - Cài đặt > Phân loại công việc: thêm loại riêng (ví dụ "Báo cáo an toàn lao động") và chọn chu kỳ.
+  - Mỗi công việc có "Loại công việc": Văn bản thường, Báo cáo tuần / tháng / quý / 6 tháng / năm,
+    hoặc loại do bạn thêm. Thẻ "Định kỳ" ở đầu danh sách chỉ hiện các báo cáo định kỳ.
+  - Tự đặt lịch cho từng loại: Cài đặt > Phân loại công việc > Sửa (hoặc "Thêm loại mới"):
+      Hàng tuần        : chọn thứ mấy (vd Thứ Sáu)
+      Hàng tháng       : chọn ngày (vd ngày 25, hoặc cuối tháng)
+      Hàng quý / 6 tháng / năm : chọn tháng thứ mấy trong kỳ và ngày hạn
+    Màn hình hiện luôn 3 hạn sắp tới để kiểm tra lại.
+  - Cán bộ phụ trách mặc định: tự điền khi chọn loại đó lúc thêm văn bản.
+  - "Tự tạo công việc trước hạn": bật thì mỗi lần mở ứng dụng, các hạn trong N ngày tới tự có sẵn công việc
+    (vd "Báo cáo tuần (hạn 02/10/2026)"), không bị trùng dù nhiều người mở cùng lúc.
+    Tắt thì khi bạn bấm "Đã xong", ứng dụng hỏi có tạo công việc kỳ sau theo đúng lịch không.
+  - Khi thêm văn bản thuộc loại định kỳ: hiện "Hạn theo lịch", bấm "Đặt hạn này" để điền.
   - Nếu đã cài bản cũ: dán lại Code.gs và index.html, chạy lại hàm caiDat (không mất dữ liệu),
     rồi Triển khai phiên bản mới.
 

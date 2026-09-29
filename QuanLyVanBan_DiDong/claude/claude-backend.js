@@ -53,6 +53,18 @@
       var ref = db.collection('docs').doc();
       return ref.set(o).then(function () { return { id: ref.id }; });
     },
+    createAuto: function (d) {
+      if (!/^auto-[A-Za-z0-9_]+-\d{4}-\d{2}-\d{2}$/.test(String(d.newId || ''))) throw new Error('Mã tự tạo không hợp lệ');
+      var ref = need().doc('docs/' + d.newId);
+      return ref.get().then(function (s) {
+        if (s.exists) return { id: d.newId, created: false };
+        var o = {};
+        TEXT.forEach(function (k) { o[k] = String(d[k] == null ? '' : d[k]).trim(); });
+        o.ket_qua = 'chua'; o.ky_sau = ''; if (!o.loai) o.loai = 'vb';
+        o.sua_luc = now(); o.tao_luc = o.sua_luc; o.anh = [];
+        return ref.set(o).then(function () { return { id: d.newId, created: true }; });
+      });
+    },
     getLoai: function () {
       return need().doc('config/loai').get().then(function (s) { var l = s.exists && s.data().list; return (l && l.length) ? l : null; });
     },
@@ -62,7 +74,14 @@
       var clean = list.map(function (x) {
         var name = String(x.name || '').trim().slice(0, 60), id = String(x.id || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 30);
         if (!name || !id) throw new Error('Tên loại không hợp lệ');
-        return { id: id, name: name, ky: ok[x.ky || ''] ? (x.ky || '') : '' };
+        var ky = ok[x.ky || ''] ? (x.ky || '') : '', o = { id: id, name: name, ky: ky };
+        var num = function (v, lo, hi, def) { v = parseInt(v, 10); return isNaN(v) ? def : Math.max(lo, Math.min(hi, v)); };
+        if (ky) {
+          o.ngay = num(x.ngay, 0, ky === 'tuan' ? 6 : 31, ky === 'tuan' ? 5 : 0);
+          if (ky !== 'tuan' && ky !== 'thang') o.thang = num(x.thang, 1, { quy: 3, '6thang': 6, nam: 12 }[ky], 1);
+          o.auto = !!x.auto; o.truoc = num(x.truoc, 0, 60, 7); o.can_bo = String(x.can_bo || '').trim().slice(0, 100);
+        }
+        return o;
       });
       if (!clean.some(function (x) { return x.id === 'vb'; })) throw new Error('Phải giữ loại "Văn bản thường"');
       return need().doc('config/loai').set({ list: clean }).then(function () { return true; });

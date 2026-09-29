@@ -31,7 +31,13 @@
     ping: function () { return true; },
     getAll: function () { return JSON.parse(JSON.stringify(db)); },
     getInfo: function () { return { sheetUrl: '', email: 'ban@example.com', gio: 7, soNgay: 3 }; },
-    getLoai: function () { try { var l = JSON.parse(localStorage.getItem(KEY + '-loai')); return l && l.length ? l : null; } catch (e) { return null; } },
+    createAuto: function (d) {
+      if (db.some(function (x) { return x.id === d.newId; })) return { id: d.newId, created: false };
+      var o = { id: d.newId, anh: [], tao_luc: new Date().toISOString(), sua_luc: new Date().toISOString(), ky_sau: '', ket_qua: 'chua' };
+      ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ghi_chu_ket_qua', 'loai'].forEach(function (k) { o[k] = String(d[k] || ''); });
+      db.push(o); save(); return { id: o.id, created: true };
+    },
+    getLoai: function () { try { var l = JSON.parse(localStorage.getItem(KEY + '-loai')); if (l && l.length) return l; } catch (e) { } return [{ id: 'vb', name: 'Văn bản thường', ky: '' }, { id: 'bctuan', name: 'Báo cáo tuần', ky: 'tuan', ngay: 5, auto: true, truoc: 10, can_bo: 'Trần Thị Bình' }, { id: 'bcthang', name: 'Báo cáo tháng', ky: 'thang', ngay: 0 }, { id: 'bcquy', name: 'Báo cáo quý', ky: 'quy', thang: 3, ngay: 20 }, { id: 'bc6thang', name: 'Báo cáo 6 tháng', ky: '6thang', thang: 6, ngay: 0 }, { id: 'bcnam', name: 'Báo cáo năm', ky: 'nam', thang: 12, ngay: 0 }]; },
     saveLoai: function (list) { try { localStorage.setItem(KEY + '-loai', JSON.stringify(list)); } catch (e) { } return true; },
     saveDoc: function (d) {
       if (!d.id && !String(d.trich_yeu || '').trim() && !String(d.so_van_ban || '').trim()) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');

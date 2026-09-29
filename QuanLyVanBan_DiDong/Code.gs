@@ -84,7 +84,14 @@ var API_ = {
     var clean = list.map(function (x) {
       var name = String(x.name || '').trim().slice(0, 60), id = String(x.id || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 30);
       if (!name || !id) throw new Error('Tên loại không hợp lệ');
-      return { id: id, name: name, ky: ok[x.ky || ''] ? (x.ky || '') : '' };
+      var ky = ok[x.ky || ''] ? (x.ky || '') : '', o = { id: id, name: name, ky: ky };
+      var num = function (v, lo, hi, def) { v = parseInt(v, 10); return isNaN(v) ? def : Math.max(lo, Math.min(hi, v)); };
+      if (ky) {
+        o.ngay = num(x.ngay, 0, ky === 'tuan' ? 6 : 31, ky === 'tuan' ? 5 : 0);
+        if (ky !== 'tuan' && ky !== 'thang') o.thang = num(x.thang, 1, { quy: 3, '6thang': 6, nam: 12 }[ky], 1);
+        o.auto = !!x.auto; o.truoc = num(x.truoc, 0, 60, 7); o.can_bo = String(x.can_bo || '').trim().slice(0, 100);
+      }
+      return o;
     });
     if (!clean.some(function (x) { return x.id === 'vb'; })) throw new Error('Phải giữ loại "Văn bản thường"');
     PropertiesService.getScriptProperties().setProperty('LOAI', JSON.stringify(clean));
@@ -105,6 +112,19 @@ var API_ = {
       layAnh_(sh, r).forEach(function (a) { try { DriveApp.getFileById(a.id).setTrashed(true); } catch (e) { } });
       sh.deleteRow(r);
       return true;
+    });
+  },
+  createAuto: function (d) {
+    if (!/^auto-[A-Za-z0-9_]+-\d{4}-\d{2}-\d{2}$/.test(String(d.newId || ''))) throw new Error('Mã tự tạo không hợp lệ');
+    return voiKhoa_(function () {
+      var sh = sheet_();
+      if (coDong_(sh, d.newId)) return { id: d.newId, created: false };
+      var row = {};
+      TU_KHOA_EDIT.forEach(function (k) { row[k] = String(d[k] == null ? '' : d[k]).trim(); });
+      ['ngay_van_ban', 'ngay_nhan', 'han'].forEach(function (k) { row[k] = chuoiNgay_(row[k]); });
+      row.ket_qua = 'chua'; row.ky_sau = ''; if (!row.loai) row.loai = 'vb';
+      chen_(sh, row, d.newId);
+      return { id: d.newId, created: true };
     });
   },
   addPhoto: function (id, name, dataUrl) {
@@ -223,6 +243,22 @@ function timDong_(sh, id) {
   if (!hit) throw new Error('Không tìm thấy văn bản');
   return hit.getRow();
 }
+function coDong_(sh, id) {
+  var n = sh.getLastRow();
+  if (n < 2) return 0;
+  var hit = sh.getRange(2, 1, n - 1, 1).createTextFinder(String(id)).matchEntireCell(true).findNext();
+  return hit ? hit.getRow() : 0;
+}
+function chen_(sh, row, id) {
+  var t = bayGio_();
+  var vals = COLS.map(function (c) {
+    if (c === 'id') return id;
+    if (c === 'anh') return '[]';
+    if (c === 'tao_luc' || c === 'sua_luc') return t;
+    return row[c] == null ? '' : row[c];
+  });
+  sh.getRange(sh.getLastRow() + 1, 1, 1, COLS.length).setNumberFormat('@').setValues([vals]);
+}
 function layAnh_(sh, r) {
   try { return JSON.parse(sh.getRange(r, COLS.indexOf('anh') + 1).getValue() || '[]'); } catch (e) { return []; }
 }
@@ -245,14 +281,7 @@ function luu_(d) {
     if (!row.loai) row.loai = 'vb';
     if (!row.trich_yeu && !row.so_van_ban) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
     var id = 'v' + new Date().getTime();
-    var vals = COLS.map(function (c) {
-      if (c === 'id') return id;
-      if (c === 'anh') return '[]';
-      if (c === 'tao_luc' || c === 'sua_luc') return t;
-      return row[c];
-    });
-    var r2 = sh.getLastRow() + 1;
-    sh.getRange(r2, 1, 1, COLS.length).setNumberFormat('@').setValues([vals]);
+    chen_(sh, row, id);
     return { id: id };
   });
 }
