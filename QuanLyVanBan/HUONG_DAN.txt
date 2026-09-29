@@ -6,7 +6,7 @@ CÀI ĐẶT (làm 1 lần)
 Chương trình chỉ cần Python, KHÔNG cần cài thêm thư viện nào.
 Windows 7 chạy được Python tối đa bản 3.8.
 
-Cách 1 (gọn nhất, đúng ý "gom vào 1 folder"): dùng bản Python di động
+Cách 1 (gọn nhất; nếu thư mục python đã có sẵn thì bỏ qua, chỉ cần bấm CHAY.bat; đúng ý "gom vào 1 folder"): dùng bản Python di động
   1. Tải "Windows embeddable package (32-bit hoặc 64-bit)" của Python 3.8.10 tại
      https://www.python.org/downloads/release/python-3810/
   2. Giải nén TOÀN BỘ vào thư mục con tên "python" nằm cạnh file CHAY.bat
