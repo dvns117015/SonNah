@@ -20,7 +20,8 @@
     DB = db;
     if (!db) { snapErr = 'Không kết nối được kho dữ liệu. Hãy mở trang này trong ứng dụng Claude và đăng nhập.'; firstSnap(); return; }
     db.collection('docs').onSnapshot(function (snap) {
-      docs = snap.docs.map(function (d) { var o = d.data() || {}; o.id = d.id; if (!o.anh) o.anh = []; return o; });
+      // data() trả về đối tượng đóng băng: phải sao chép trước khi thêm id, nếu không id bị mất
+      docs = snap.docs.map(function (d) { var o = JSON.parse(JSON.stringify(d.data() || {})); o.id = d.id; if (!o.anh) o.anh = []; return o; });
       firstSnap();
       if (window.__reload && !snap.metadata.hasPendingWrites) window.__reload();
     }, function (e) { snapErr = nice(e); firstSnap(); });
@@ -66,7 +67,19 @@
       });
     },
     getLoai: function () {
-      return need().doc('config/loai').get().then(function (s) { var l = s.exists && s.data().list; return (l && l.length) ? l : null; });
+      return need().doc('config/loai').get().then(function (s) { var l = s.exists && s.data().list; return (l && l.length) ? JSON.parse(JSON.stringify(l)) : null; });
+    },
+    getCanBo: function () {
+      return need().doc('config/canbo').get().then(function (s) { var l = s.exists && s.data().list; return (l && l.length) ? JSON.parse(JSON.stringify(l)) : null; });
+    },
+    saveCanBo: function (list) {
+      if (!list || list.length > 300) throw new Error('Danh sách cán bộ không hợp lệ');
+      var seen = {}, clean = [];
+      list.forEach(function (n) {
+        n = String(n || '').trim().slice(0, 60);
+        if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; clean.push(n); }
+      });
+      return need().doc('config/canbo').set({ list: clean }).then(function () { return true; });
     },
     saveLoai: function (list) {
       var ok = { '': 1, tuan: 1, thang: 1, quy: 1, '6thang': 1, nam: 1 };

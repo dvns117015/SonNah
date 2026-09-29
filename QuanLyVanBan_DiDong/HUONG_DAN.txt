@@ -49,6 +49,13 @@ KHI SỬA MÃ (Code.gs hoặc index.html) SAU NÀY
   Phải Triển khai > Quản lý bản triển khai > biểu tượng bút > Phiên bản: "Phiên bản mới" > Triển khai.
   Link giữ nguyên. Nếu chỉ lưu mà không tạo phiên bản mới thì người dùng vẫn thấy bản cũ.
 
+THẺ CÁN BỘ
+----------
+  - Cài đặt > Danh sách cán bộ: thêm tên, mỗi tên là một thẻ màu. Bấm x trên thẻ để xóa khỏi danh sách.
+  - Khi thêm hoặc sửa văn bản, mục "Cán bộ thực hiện" hiện các thẻ: chạm để chọn (chọn được nhiều người),
+    chạm lại để bỏ. Gõ tên mới rồi bấm Thêm thì tên đó tự vào danh sách để lần sau chọn lại.
+  - Bộ lọc cũng có thẻ cán bộ để lọc nhanh.
+
 PHÂN LOẠI VÀ BÁO CÁO ĐỊNH KỲ
 ----------------------------
   - Mỗi công việc có "Loại công việc": Văn bản thường, Báo cáo tuần / tháng / quý / 6 tháng / năm,
