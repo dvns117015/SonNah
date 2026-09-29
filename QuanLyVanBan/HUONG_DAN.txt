@@ -1,0 +1,45 @@
+QUẢN LÝ VĂN BẢN - HƯỚNG DẪN (Windows 7)
+========================================
+
+CÀI ĐẶT (làm 1 lần)
+-------------------
+Chương trình chỉ cần Python, KHÔNG cần cài thêm thư viện nào.
+Windows 7 chạy được Python tối đa bản 3.8.
+
+Cách 1 (gọn nhất; nếu thư mục python đã có sẵn thì bỏ qua, chỉ cần bấm CHAY.bat; đúng ý "gom vào 1 folder"): dùng bản Python di động
+  1. Tải "Windows embeddable package (32-bit hoặc 64-bit)" của Python 3.8.10 tại
+     https://www.python.org/downloads/release/python-3810/
+  2. Giải nén TOÀN BỘ vào thư mục con tên "python" nằm cạnh file CHAY.bat
+     (phải có file QuanLyVanBan\python\python.exe).
+  Không cần cài đặt gì vào máy. Chép cả thư mục sang máy khác vẫn chạy.
+
+Cách 2: cài Python 3.8.10 bình thường (nhớ tích "Add Python to PATH").
+
+SỬ DỤNG
+-------
+  - Bấm đúp CHAY.bat -> trình duyệt tự mở trang http://127.0.0.1:8080/
+  - Không tắt cửa sổ đen trong lúc dùng. Đóng cửa sổ đó là tắt chương trình.
+  - Trình duyệt: nên dùng Chrome 109 / Firefox ESR (không dùng Internet Explorer).
+  - Muốn nhiều máy trong cơ quan cùng vào: chạy CHAY_MANG_LAN.bat, các máy khác gõ
+    http://<IP máy này>:8080/  (xem IP bằng lệnh ipconfig). Chưa có mật khẩu, chỉ dùng
+    trong mạng nội bộ tin cậy.
+
+CÁC CHỨC NĂNG
+-------------
+  - Thêm/sửa/xóa văn bản: số VB, ngày VB, ngày nhận, trích yếu, ghi chú nội dung công việc,
+    ý kiến chỉ đạo, cán bộ thực hiện, hạn, kết quả, ghi chú kết quả, tải file PDF lên.
+  - Đổi nhanh kết quả (Chưa xong / Đang thực hiện / Đã xong / Không thực hiện) ngay trong bảng.
+  - Tìm kiếm, lọc theo kết quả, quá hạn, cán bộ, khoảng hạn, khoảng ngày nhận.
+  - NHẮC VIỆC: khung màu cam trên đầu trang liệt kê văn bản quá hạn / sắp đến hạn
+    (chỉnh "Nhắc trước ... ngày" ở góc phải); tiêu đề tab hiện số việc cần làm.
+    Bấm "Bật thông báo" để có thêm thông báo nổi của trình duyệt (khi đang mở trang).
+  - IN DANH SÁCH KÝ NHẬN: tích chọn các dòng cần in (không chọn = in tất cả đang lọc),
+    bấm "In danh sách ký nhận"; có thể tách theo từng cán bộ, mỗi người 1 trang, có cột ký nhận.
+    Trong hộp thoại in chọn máy in hoặc "Save as PDF".
+  - Xuất Excel (CSV): mở bằng Excel, có sẵn cột "Ký nhận" để trống.
+
+DỮ LIỆU & SAO LƯU
+-----------------
+  Toàn bộ dữ liệu nằm trong thư mục "data" (app.db và thư mục files chứa PDF).
+  Sao lưu = chép cả thư mục QuanLyVanBan (hoặc riêng thư mục data) sang USB/ổ khác.
+  Nên sao lưu định kỳ, tốt nhất khi đã tắt chương trình.

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý văn bản</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <h1>Quản lý văn bản &amp; theo dõi công việc</h1>
+    <div class="top-right">
+      <label class="small">Nhắc trước <input type="number" id="remDays" min="0" max="60" value="3" style="width:50px"> ngày</label>
+      <button id="btnNotify" class="btn ghost" title="Cho phép thông báo trên màn hình">🔔 Bật thông báo</button>
+      <button id="btnAdd" class="btn primary">+ Thêm văn bản</button>
+    </div>
+  </header>
+
+  <div id="reminder" class="reminder" style="display:none"></div>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="filters">
+    <input type="text" id="fQ" placeholder="Tìm số VB, trích yếu, nội dung, chỉ đạo...">
+    <select id="fKq">
+      <option value="">Tất cả kết quả</option>
+      <option value="chuaxong">Chưa hoàn thành (chưa + đang)</option>
+      <option value="quahan">⚠ Quá hạn</option>
+      <option value="chua">Chưa xong</option>
+      <option value="dang">Đang thực hiện</option>
+      <option value="xong">Đã xong</option>
+      <option value="huy">Không thực hiện</option>
+    </select>
+    <input type="text" id="fCb" list="dlCb" placeholder="Cán bộ thực hiện">
+    <label class="small">Hạn từ <input type="date" id="fHanTu"></label>
+    <label class="small">đến <input type="date" id="fHanDen"></label>
+    <label class="small">Nhận từ <input type="date" id="fNhanTu"></label>
+    <label class="small">đến <input type="date" id="fNhanDen"></label>
+    <button id="btnClear" class="btn ghost">Xóa lọc</button>
+  </section>
+
+  <section class="toolbar">
+    <span id="count" class="small"></span>
+    <span class="grow"></span>
+    <button id="btnSign" class="btn">🖨 In danh sách ký nhận</button>
+    <button id="btnCsv" class="btn">⬇ Xuất Excel (CSV)</button>
+  </section>
+
+  <div class="tablewrap">
+  <table id="tbl">
+    <thead><tr>
+      <th style="width:28px"><input type="checkbox" id="chkAll" title="Chọn tất cả"></th>
+      <th style="width:34px">STT</th>
+      <th style="width:120px">Số VB / Ngày VB / Ngày nhận</th>
+      <th>Trích yếu &amp; nội dung công việc</th>
+      <th style="width:22%">Ý kiến chỉ đạo</th>
+      <th style="width:110px">Cán bộ thực hiện</th>
+      <th style="width:100px">Hạn</th>
+      <th style="width:130px">Kết quả</th>
+      <th style="width:90px">File / Thao tác</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  </div>
+</div>
+
+<datalist id="dlCb"></datalist>
+
+<!-- Form them / sua -->
+<div id="modal" class="overlay" style="display:none">
+  <div class="dialog">
+    <h2 id="mTitle">Thêm văn bản</h2>
+    <form id="frm" onsubmit="return false">
+      <div class="grid">
+        <label>Số văn bản <input type="text" id="so_van_ban"></label>
+        <label>Ngày văn bản <input type="date" id="ngay_van_ban"></label>
+        <label>Ngày nhận <input type="date" id="ngay_nhan"></label>
+        <label class="span3">Trích yếu <textarea id="trich_yeu" rows="2"></textarea></label>
+        <label class="span3">Ghi chú nội dung công việc <textarea id="noi_dung" rows="2"></textarea></label>
+        <label class="span3">Ý kiến chỉ đạo <textarea id="y_kien_chi_dao" rows="2"></textarea></label>
+        <label>Cán bộ thực hiện <input type="text" id="can_bo" list="dlCb" placeholder="Nhiều người: cách nhau dấu ,"></label>
+        <label>Hạn hoàn thành <input type="date" id="han"></label>
+        <label>Kết quả
+          <select id="ket_qua">
+            <option value="chua">Chưa xong</option>
+            <option value="dang">Đang thực hiện</option>
+            <option value="xong">Đã xong</option>
+            <option value="huy">Không thực hiện</option>
+          </select>
+        </label>
+        <label class="span3">Ghi chú kết quả <input type="text" id="ghi_chu_ket_qua"></label>
+        <div class="span3">
+          <label>File PDF văn bản <input type="file" id="pdf" accept="application/pdf,.pdf"></label>
+          <div id="curFile" class="small"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="mCancel" class="btn ghost">Hủy</button>
+        <button type="button" id="mSave" class="btn primary">Lưu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Danh sach ky nhan (xem truoc + in) -->
+<div id="signView" class="overlay" style="display:none">
+  <div class="dialog wide">
+    <div class="noprint signbar">
+      <label>Tiêu đề <input type="text" id="sgTitle" value="DANH SÁCH KÝ NHẬN VĂN BẢN" style="width:280px"></label>
+      <label><input type="checkbox" id="sgGroup"> Tách theo từng cán bộ (mỗi người 1 trang)</label>
+      <span class="grow"></span>
+      <button id="sgPrint" class="btn primary">🖨 In</button>
+      <button id="sgClose" class="btn ghost">Đóng</button>
+    </div>
+    <div id="signPaper"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

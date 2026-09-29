@@ -1,0 +1,73 @@
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.4 "Segoe UI",Tahoma,Arial,sans-serif;background:#f3f5f8;color:#1c2733}
+#app{max-width:1500px;margin:0 auto;padding:12px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.top h1{font-size:20px;margin:0;color:#14477d}
+.top-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.small{font-size:12px;color:#55606c}
+.grow{flex:1}
+input,select,textarea{font:inherit;padding:5px 7px;border:1px solid #b9c2cc;border-radius:4px;background:#fff}
+textarea{width:100%;resize:vertical}
+.btn{font:inherit;padding:6px 12px;border:1px solid #9aa7b4;background:#fff;border-radius:4px;cursor:pointer}
+.btn:hover{background:#eaf0f6}
+.btn.primary{background:#1b6ac9;color:#fff;border-color:#1b6ac9}
+.btn.primary:hover{background:#1558a8}
+.btn.ghost{background:transparent}
+.btn.sm{padding:2px 7px;font-size:12px}
+.btn.danger{color:#b3261e;border-color:#e0a8a4}
+.reminder{background:#fff4e0;border:1px solid #f0b95c;border-left:6px solid #e58a00;border-radius:4px;padding:8px 12px;margin-bottom:10px}
+.reminder h3{margin:0 0 4px;font-size:15px;color:#a35c00}
+.reminder ul{margin:4px 0 0;padding-left:18px}
+.reminder .late{color:#b3261e;font-weight:600}
+.reminder .close{float:right;cursor:pointer;border:0;background:none;font-size:18px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.stat{flex:1;min-width:130px;background:#fff;border:1px solid #d5dbe2;border-radius:6px;padding:8px 12px;cursor:pointer}
+.stat b{display:block;font-size:22px}
+.stat.red b{color:#b3261e}.stat.green b{color:#1e7d34}.stat.orange b{color:#c26a00}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid #d5dbe2;border-radius:6px;padding:8px;margin-bottom:8px}
+.filters #fQ{flex:1;min-width:220px}
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.tablewrap{overflow-x:auto;background:#fff;border:1px solid #d5dbe2;border-radius:6px}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid #e3e8ee;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#e8eef5;position:sticky;top:0;font-size:13px}
+tr:hover td{background:#f8fbff}
+tr.done td{color:#7b8794}
+.trich{font-weight:600}
+.nd{color:#3d4b59;margin-top:2px;white-space:pre-wrap}
+.pre{white-space:pre-wrap}
+.han{font-weight:600}
+.han.late{color:#b3261e}.han.soon{color:#c26a00}
+.tag{font-size:11px;display:block;font-weight:400}
+.kq{width:100%;font-size:13px;padding:3px}
+.kq.chua{background:#fde8e6}.kq.dang{background:#fff1d6}.kq.xong{background:#dff3e3}.kq.huy{background:#eceff1}
+.empty{text-align:center;color:#7b8794;padding:24px}
+.overlay{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(20,30,40,.55);overflow:auto;padding:20px;z-index:10}
+.dialog{background:#fff;max-width:820px;margin:0 auto;border-radius:6px;padding:16px 18px}
+.dialog.wide{max-width:1200px}
+.dialog h2{margin:0 0 10px;font-size:18px;color:#14477d}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid label{display:block;font-size:12px;color:#55606c}
+.grid input[type=text],.grid input[type=date],.grid select{width:100%;display:block;margin-top:2px;font-size:14px;color:#1c2733}
+.grid textarea{margin-top:2px;color:#1c2733;font-size:14px}
+.span3{grid-column:span 3}
+.actions{text-align:right;margin-top:12px}
+.signbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+#signPaper{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:13px}
+#signPaper h2{text-align:center;margin:8px 0 2px;font-size:17px;color:#000}
+#signPaper .sub{text-align:center;margin-bottom:10px;font-style:italic}
+#signPaper table{width:100%;border-collapse:collapse}
+#signPaper th,#signPaper td{border:1px solid #000;padding:5px 6px;position:static;background:none}
+#signPaper th{text-align:center}
+#signPaper td.ky{height:46px;width:120px}
+.pgbreak{page-break-after:always}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.span3{grid-column:auto}}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  body{background:#fff}
+  #app,.noprint{display:none!important}
+  .overlay{position:static;background:none;padding:0;overflow:visible}
+  #signView{display:block!important}
+  .dialog{box-shadow:none;padding:0;max-width:none}
+  #modal{display:none!important}
+}

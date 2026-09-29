@@ -1,0 +1,74 @@
+QUẢN LÝ VĂN BẢN TRÊN ĐIỆN THOẠI (Google Sheet + Google Apps Script)
+====================================================================
+
+Ứng dụng là một trang web mở bằng trình duyệt điện thoại (Chrome, Safari), có thể
+"Thêm vào màn hình chính" để dùng như ứng dụng. Không cần máy chủ, không tốn tiền.
+
+  - Dữ liệu văn bản   : Google Sheet của bạn (tab "VanBan"), mở lên xem/in/xuất Excel được.
+  - Ảnh chụp văn bản  : thư mục Google Drive "QuanLyVanBan - Anh" (riêng tư, không công khai).
+  - Nhắc việc         : khung nhắc trong ứng dụng + email tự gửi mỗi sáng.
+
+CÀI ĐẶT (làm 1 lần, khoảng 10 phút, trên máy tính)
+---------------------------------------------------
+1. Vào https://sheets.google.com, tạo Google Sheet mới, đặt tên tùy ý (vd: "Quản lý văn bản").
+2. Trong Sheet: menu Tiện ích mở rộng > Apps Script.
+3. Trong Apps Script:
+   a. Xóa hết nội dung file Code.gs có sẵn, dán toàn bộ nội dung file Code.gs của thư mục này vào.
+   b. Bấm dấu + cạnh "Tệp" > chọn "HTML", đặt tên đúng là:  index   (không gõ .html)
+      Dán toàn bộ nội dung file index.html của thư mục này vào.
+   c. (Tùy chọn) Ở đầu Code.gs, sửa khối CAU_HINH:
+        MA_TRUY_CAP : mã để vào ứng dụng, vd '2468'  (NÊN đặt, vì link ai có cũng mở được)
+        EMAIL_NHAC  : email nhận thư nhắc, cách nhau dấu phẩy (trống = email của bạn)
+        SO_NGAY_NHAC, GIO_GUI : nhắc trước mấy ngày, gửi lúc mấy giờ
+4. Chọn hàm "caiDat" ở thanh trên rồi bấm Chạy. Google hỏi cấp quyền:
+   Xem lại quyền > chọn tài khoản > "Nâng cao" > "Đi tới ... (không an toàn)" > Cho phép.
+   (Cảnh báo này bình thường vì ứng dụng do chính bạn viết.)
+   Hàm này tạo tab dữ liệu, thư mục ảnh và lịch gửi email nhắc việc mỗi sáng.
+5. Triển khai > Tùy chọn triển khai mới > loại "Ứng dụng web":
+      Thực thi bằng tài khoản : Tôi
+      Ai có quyền truy cập    : Bất kỳ ai
+   Bấm Triển khai, copy "URL ứng dụng web" (dạng https://script.google.com/macros/s/.../exec).
+6. Gửi URL đó cho cán bộ. Trên điện thoại: mở link > menu trình duyệt > "Thêm vào màn hình chính".
+
+SỬ DỤNG
+-------
+  - Nút "Thêm văn bản": bấm "Chụp ảnh văn bản" (chụp nhiều trang được), điền thông tin, Lưu.
+    Ảnh tự thu nhỏ trước khi tải lên nên nhẹ, chạy được cả khi mạng yếu.
+  - Bấm vào văn bản để xem chi tiết, xem ảnh, đổi kết quả nhanh (Chưa xong / Đang thực hiện /
+    Đã xong / Không thực hiện), sửa, xóa.
+  - Thanh tìm kiếm + nút lọc (cán bộ, khoảng hạn, khoảng ngày nhận) + thẻ Chưa xong / Quá hạn / Đã xong.
+  - Nhắc việc: khung màu ở đầu trang liệt kê việc quá hạn/sắp đến hạn; email gửi mỗi sáng.
+    Thử ngay: Cài đặt > "Gửi thử email nhắc việc".
+  - Danh sách ký nhận: bấm biểu tượng cây bút ở đầu trang, chạm chọn các văn bản (không chọn = tất cả
+    đang lọc), "Tiếp tục", có thể tách theo từng cán bộ, bấm "Tạo file PDF" (lưu trong Drive,
+    thư mục "QuanLyVanBan - PDF ky nhan"), mở lên in hoặc gửi Zalo.
+  - Xuất Excel: Cài đặt > "Mở Google Sheet", rồi Tệp > Tải xuống > Excel.
+
+KHI SỬA MÃ (Code.gs hoặc index.html) SAU NÀY
+--------------------------------------------
+  Phải Triển khai > Quản lý bản triển khai > biểu tượng bút > Phiên bản: "Phiên bản mới" > Triển khai.
+  Link giữ nguyên. Nếu chỉ lưu mà không tạo phiên bản mới thì người dùng vẫn thấy bản cũ.
+
+PHÂN LOẠI VÀ BÁO CÁO ĐỊNH KỲ
+----------------------------
+  - Mỗi công việc có "Loại công việc": Văn bản thường, Báo cáo tuần / tháng / quý / 6 tháng / năm,
+    hoặc loại do bạn thêm. Thẻ "Định kỳ" ở đầu danh sách chỉ hiện các báo cáo định kỳ.
+  - Tự đặt lịch cho từng loại: Cài đặt > Phân loại công việc > Sửa (hoặc "Thêm loại mới"):
+      Hàng tuần        : chọn thứ mấy (vd Thứ Sáu)
+      Hàng tháng       : chọn ngày (vd ngày 25, hoặc cuối tháng)
+      Hàng quý / 6 tháng / năm : chọn tháng thứ mấy trong kỳ và ngày hạn
+    Màn hình hiện luôn 3 hạn sắp tới để kiểm tra lại.
+  - Cán bộ phụ trách mặc định: tự điền khi chọn loại đó lúc thêm văn bản.
+  - "Tự tạo công việc trước hạn": bật thì mỗi lần mở ứng dụng, các hạn trong N ngày tới tự có sẵn công việc
+    (vd "Báo cáo tuần (hạn 02/10/2026)"), không bị trùng dù nhiều người mở cùng lúc.
+    Tắt thì khi bạn bấm "Đã xong", ứng dụng hỏi có tạo công việc kỳ sau theo đúng lịch không.
+  - Khi thêm văn bản thuộc loại định kỳ: hiện "Hạn theo lịch", bấm "Đặt hạn này" để điền.
+  - Nếu đã cài bản cũ: dán lại Code.gs và index.html, chạy lại hàm caiDat (không mất dữ liệu),
+    rồi Triển khai phiên bản mới.
+
+LƯU Ý
+-----
+  - Đừng xóa hoặc đổi thứ tự cột hàng tiêu đề trong tab VanBan. Có thể tô màu, thêm tab khác.
+  - Dữ liệu và ảnh thuộc tài khoản Google của bạn, sao lưu bằng cách Tệp > Tạo bản sao.
+  - Nếu bật MA_TRUY_CAP, mỗi điện thoại nhập mã 1 lần (nhớ trong trình duyệt).
+  - Ứng dụng cần mạng Internet để dùng.
