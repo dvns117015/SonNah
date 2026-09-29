@@ -78,6 +78,20 @@ var API_ = {
     var s = PropertiesService.getScriptProperties().getProperty('LOAI');
     try { var l = JSON.parse(s); return (l && l.length) ? l : null; } catch (e) { return null; }
   },
+  getCanBo: function () {
+    var s = PropertiesService.getScriptProperties().getProperty('CANBO');
+    try { var l = JSON.parse(s); return (l && l.length) ? l : null; } catch (e) { return null; }
+  },
+  saveCanBo: function (list) {
+    if (!list || list.length > 300) throw new Error('Danh sách cán bộ không hợp lệ');
+    var seen = {}, clean = [];
+    list.forEach(function (n) {
+      n = String(n || '').trim().slice(0, 60);
+      if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; clean.push(n); }
+    });
+    PropertiesService.getScriptProperties().setProperty('CANBO', JSON.stringify(clean));
+    return true;
+  },
   saveLoai: function (list) {
     var ok = { '': 1, tuan: 1, thang: 1, quy: 1, '6thang': 1, nam: 1 };
     if (!list || !list.length || list.length > 60) throw new Error('Danh sách loại không hợp lệ');
