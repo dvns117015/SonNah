@@ -187,6 +187,13 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
 .th img{width:100%;height:100%;object-fit:cover;display:block}
 .th .x{position:absolute;top:5px;right:5px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(20,20,40,.7);color:#fff;font-size:17px;line-height:1;cursor:pointer}
 .th .ld{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;color:var(--muted)}
+.frow{display:flex;align-items:center;gap:10px;background:var(--grey-soft);border-radius:14px;padding:10px 12px;cursor:pointer;min-height:48px}
+.frow .fi{width:36px;height:36px;border-radius:10px;background:var(--red-soft);color:var(--red);display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}
+.frow span{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:600;font-size:14px}
+.frow small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.frow .rmx{border:0;background:rgba(0,0,0,.1);color:inherit;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;line-height:1}
+.g-ok{--gc:var(--mint)}
+.donebox{background:var(--green-soft);color:var(--green);border-radius:16px;padding:12px 14px;font-weight:600;font-size:14px}
 .viewer{position:fixed;inset:0;z-index:40;background:#000;display:grid;grid-template-rows:auto 1fr auto}
 .viewer .vt{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;color:#fff}
 .viewer .vt button,.viewer .vb button{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:12px;padding:11px 18px;font-weight:600;cursor:pointer}
@@ -322,6 +329,34 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
     <div style="flex:1;display:grid;gap:6px" id="fSaveWrap">
       <div class="prog" id="fProg" hidden><i></i></div>
       <button class="btn primary block" id="fSave">Lưu văn bản</button>
+    </div>
+  </div></div>
+</section>
+
+<!-- Hoàn thành công việc: bắt buộc đính kèm ảnh hoặc file kết quả -->
+<section class="screen" id="scrDone" hidden>
+  <div class="s-head"><div class="wrap"><div class="bar-row">
+    <button class="ib" data-close="scrDone" aria-label="Quay lại"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <h2 id="dnHead">Hoàn thành công việc</h2>
+  </div></div></div>
+  <div class="wrap"><div class="s-body">
+    <div class="donebox" id="dnTip">Đính kèm ảnh chụp hoặc file kết quả thì mới đánh dấu Đã xong.</div>
+    <div class="group g-ok">
+      <h4>Ảnh, file kết quả</h4>
+      <label class="shot" for="dnCamera" style="border-color:var(--mint);background:var(--green-soft);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>Chụp ảnh kết quả<small>Chụp được nhiều ảnh</small></label>
+      <input type="file" id="dnCamera" accept="image/*" capture="environment" hidden>
+      <label class="btn block" for="dnFile">Tải ảnh hoặc file PDF lên</label>
+      <input type="file" id="dnFile" accept="image/*,application/pdf,.pdf" multiple hidden>
+      <div id="dnList" style="display:grid;gap:8px"></div>
+    </div>
+    <div class="group g-do" id="dnNoteBox">
+      <label class="f">Ghi chú kết quả (không bắt buộc)<textarea class="field" id="dnNote" rows="2"></textarea></label>
+    </div>
+  </div></div>
+  <div class="s-foot"><div class="wrap">
+    <div style="flex:1;display:grid;gap:6px">
+      <div class="prog" id="dnProg" hidden><i></i></div>
+      <button class="btn primary block" id="dnGo" disabled>Hoàn thành</button>
     </div>
   </div></div>
 </section>
@@ -548,9 +583,10 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   // ---- Danh sách ----
   function load() {
     return Promise.all([rpc('getAll'), rpc('getLoai').catch(function () { return null; }), rpc('getCanBo').catch(function () { return null; })]).then(function (r) {
-      docs = r[0]; docs.forEach(function (d) { if (!d.loai) d.loai = 'vb'; });
+      docs = r[0]; docs.forEach(function (d) { if (!d.loai) d.loai = 'vb'; if (!d.bc) d.bc = []; });
       canbo = (r[2] && r[2].length) ? r[2] : namesFromDocs();
       loai = (r[1] && r[1].length) ? r[1] : DEFAULT_LOAI.slice(); renderAll(); ensureAuto();
+      if (!$('scrDetail').hidden && byId(curId)) { var y = $('scrDetail').scrollTop; openDetail(curId); $('scrDetail').scrollTop = y; }
     }).catch(function (e) { $('list').innerHTML = '<div class="empty">Không tải được dữ liệu.<br>' + esc(e.message) + '</div>'; });
   }
   function matches(d) {
@@ -913,9 +949,89 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       '<div class="group"><div class="dl">' + rows.map(function (r) { return r[1] ? '<div><small>' + r[0] + '</small><p>' + esc(r[1]) + '</p></div>' : ''; }).join('') + '</div></div>' +
       '<div class="group g-photo"><h4>Ảnh văn bản (' + d.anh.length + ')</h4>' +
       (d.anh.length ? '<div class="thumbs" id="dThumbs">' + d.anh.map(function (a) { return '<div class="th" data-view="' + esc(a.id) + '" data-fid="' + esc(a.id) + '"><div class="ld">Đang tải</div></div>'; }).join('') + '</div>' : '<div class="tip">Chưa có ảnh. Bấm Sửa để chụp ảnh văn bản.</div>') + '</div>' +
+      '<div class="group g-ok"><h4>Kết quả đính kèm (' + d.bc.length + ')</h4>' +
+      (d.bc.length ? '<div id="dProof" style="display:grid;gap:8px">' + d.bc.map(function (a) {
+        return isImg(a) ? '<div class="th" style="aspect-ratio:auto;height:180px" data-pview="' + esc(a.id) + '" data-fid="' + esc(a.id) + '"><div class="ld">Đang tải</div></div>'
+          : '<div class="frow" data-pfile="' + esc(a.id) + '"><div class="fi">PDF</div><span>' + esc(a.name) + '<small>Chạm để mở hoặc lưu</small></span></div>';
+      }).join('') + '</div>' : '<div class="tip">Chưa có ảnh hay file kết quả.</div>') +
+      '<button class="btn block" id="dAddProof">Thêm ảnh / file kết quả</button></div>' +
       '<button class="btn danger block" id="dDel">Xóa văn bản</button>';
     show('scrDetail');
     if (d.anh.length) fillThumbs($('dThumbs'), d.anh.map(function (a) { return a.id; }));
+    var pimg = d.bc.filter(isImg).map(function (a) { return a.id; });
+    if (pimg.length) fillThumbs($('dProof'), pimg);
+  }
+  function isImg(a) { return !a.type || a.type.indexOf('image/') === 0; }
+
+  // ---- Hoàn thành: bắt buộc có ảnh hoặc file kết quả ----
+  var done = { id: null, mode: 'done', pending: [] };
+  function openDone(id, mode) {
+    var d = byId(id); if (!d) return;
+    done = { id: id, mode: mode, pending: [] };
+    $('dnHead').textContent = mode === 'done' ? 'Hoàn thành công việc' : 'Thêm kết quả';
+    $('dnTip').hidden = mode !== 'done';
+    $('dnNoteBox').hidden = mode !== 'done';
+    $('dnNote').value = d.ghi_chu_ket_qua || '';
+    $('dnGo').textContent = mode === 'done' ? 'Hoàn thành' : 'Lưu ảnh / file';
+    $('dnProg').hidden = true; renderDone(); show('scrDone');
+  }
+  function renderDone() {
+    $('dnList').innerHTML = done.pending.map(function (f, i) {
+      return f.type.indexOf('image/') === 0
+        ? '<div class="th" style="aspect-ratio:auto;height:150px"><img src="' + f.dataUrl + '" alt="Ảnh kết quả ' + (i + 1) + '"><button class="x" data-dnrm="' + i + '" aria-label="Bỏ ảnh">×</button></div>'
+        : '<div class="frow"><div class="fi">PDF</div><span>' + esc(f.name) + '<small>' + Math.round(f.size / 1024) + ' KB</small></span><button class="rmx" data-dnrm="' + i + '" aria-label="Bỏ file">×</button></div>';
+    }).join('');
+    $('dnGo').disabled = !done.pending.length;
+  }
+  function addProofFiles(files) {
+    var arr = Array.prototype.slice.call(files || []), max = window.PROOF_MAX_BYTES || 15 * 1024 * 1024;
+    arr.reduce(function (p, f) {
+      return p.then(function () {
+        if (/^image\//.test(f.type)) return compress(f).then(function (u) { if (u) done.pending.push({ name: (f.name || 'anh') + '', type: 'image/jpeg', dataUrl: u, size: u.length }); else toast('Không đọc được ảnh hoặc ảnh quá lớn'); });
+        if (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) {
+          if (f.size > max) { toast('File PDF quá lớn (tối đa ' + Math.round(max / 1048576) + ' MB). Hãy chụp ảnh thay thế.'); return; }
+          return new Promise(function (res) { var r = new FileReader(); r.onload = function () { done.pending.push({ name: f.name, type: 'application/pdf', dataUrl: r.result.replace(/^data:[^;]*;/, 'data:application/pdf;'), size: f.size }); res(); }; r.onerror = function () { toast('Không đọc được file'); res(); }; r.readAsDataURL(f); });
+        }
+        toast('Chỉ nhận ảnh hoặc file PDF');
+      }).then(renderDone);
+    }, Promise.resolve());
+  }
+  function finishDone() {
+    var d = byId(done.id), btn = $('dnGo'), total = done.pending.length, n = 0, failed = 0, added = [];
+    if (!d || !total) return;
+    btn.disabled = true; $('dnProg').hidden = false;
+    var chain = Promise.resolve();
+    done.pending.forEach(function (f, i) {
+      chain = chain.then(function () {
+        btn.textContent = 'Đang lưu ' + (i + 1) + '/' + total + '...';
+        return rpc('addProof', [d.id, f.name, f.type, f.dataUrl]).then(function (a) { if (a && a.id) { added.push(a); if (f.type.indexOf('image/') === 0) photoCache[a.id] = f.dataUrl; } }).catch(function () { failed++; }).then(function () { n++; $('dnProg').firstChild.style.width = Math.round(n / total * 100) + '%'; });
+      });
+    });
+    chain.then(function () {
+      if (failed === total) throw new Error('Không lưu được ảnh hoặc file. Kiểm tra mạng rồi thử lại.');
+      if (done.mode !== 'done') return null;
+      var note = $('dnNote').value.trim();
+      return (note !== (d.ghi_chu_ket_qua || '') ? rpc('saveDoc', [{ id: d.id, ghi_chu_ket_qua: note }]) : Promise.resolve()).then(function () { return rpc('setStatus', [d.id, 'xong']); });
+    }).then(function () {
+      var wasDone = done.mode === 'done';
+      // cập nhật ngay trên máy, không chờ kho dữ liệu báo lại
+      d.bc = (d.bc || []).concat(added);
+      if (wasDone) { d.ket_qua = 'xong'; d.ghi_chu_ket_qua = $('dnNote').value.trim(); }
+      hide('scrDone'); btn.textContent = 'Hoàn thành';
+      renderAll(); openDetail(d.id);
+      if (wasDone) { confetti(); toast(failed ? 'Đã hoàn thành. ' + failed + ' file chưa lưu được.' : 'Hoàn thành! Làm tốt lắm'); offerNext(d); ensureAuto(); }
+      else toast(failed ? failed + ' file chưa lưu được' : 'Đã lưu kết quả');
+    }).catch(function (e) { btn.disabled = false; btn.textContent = done.mode === 'done' ? 'Hoàn thành' : 'Lưu ảnh / file'; toast(e.message); });
+  }
+  function openProofFile(fid, name) {
+    toast('Đang tải file...');
+    rpc('getPhoto', [fid]).then(function (u) {
+      var bin = atob(u.split(',')[1]), arr = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      var blob = new Blob([arr], { type: 'application/pdf' });
+      if (window.SAVE_FILE) return window.SAVE_FILE(/\.pdf$/i.test(name) ? name : name + '.pdf', blob).catch(function (e) { if (e && e.code !== 'declined') toast('Không lưu được file'); });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }).catch(function (e) { toast(e.message); });
   }
 
   // ---- Ký nhận ----
@@ -992,7 +1108,16 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
         if (ok) saveLoai(loai.filter(function (x) { return x.id !== id; }), 'Đã xóa loại').then(function (done) { if (done) hide('scrLoai'); });
       });
     };
-    $('fKq').onclick = function (e) { var k = e.target.getAttribute('data-kq'); if (k) { form.kq = k; renderKq(); } };
+    $('fKq').onclick = function (e) {
+      var k = e.target.getAttribute('data-kq'); if (!k) return;
+      var cur = form.id ? byId(form.id) : null;
+      if (k === 'xong' && form.kq !== 'xong' && !(cur && cur.bc && cur.bc.length)) { toast('Mở văn bản, chọn Đã xong và đính kèm ảnh hoặc file kết quả'); return; }
+      form.kq = k; renderKq();
+    };
+    $('dnCamera').onchange = function () { addProofFiles(this.files); this.value = ''; };
+    $('dnFile').onchange = function () { addProofFiles(this.files); this.value = ''; };
+    $('dnList').onclick = function (e) { var i = e.target.getAttribute('data-dnrm'); if (i !== null) { done.pending.splice(+i, 1); renderDone(); } };
+    $('dnGo').onclick = finishDone;
     $('fThumbs').onclick = function (e) {
       var rm = e.target.getAttribute('data-rm'), rp = e.target.getAttribute('data-rmp');
       if (rm) { form.existing = form.existing.filter(function (a) { return a.id !== rm; }); form.removed.push(rm); renderFormThumbs(); }
@@ -1012,8 +1137,19 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
     $('dEdit').onclick = function () { var d = byId(curId); if (d) openForm(d); };
     $('dBody').onclick = function (e) {
       var k = e.target.getAttribute('data-setkq'), v = e.target.closest('[data-view]');
-      if (k) {
-        var d = byId(curId); if (!d || d.ket_qua === k) return; var old = d.ket_qua; d.ket_qua = k; openDetail(curId); renderAll();
+      var pv = e.target.closest('[data-pview]'), pf = e.target.closest('[data-pfile]');
+      if (pv) {
+        var pids = [].map.call($('dProof').querySelectorAll('[data-pview]'), function (t) { return t.getAttribute('data-fid'); });
+        openViewer(pids, pids.indexOf(pv.getAttribute('data-fid')));
+      } else if (pf) {
+        var fa = byId(curId).bc.filter(function (a) { return a.id === pf.getAttribute('data-pfile'); })[0];
+        openProofFile(fa.id, fa.name);
+      } else if (e.target.id === 'dAddProof') {
+        openDone(curId, 'attach');
+      } else if (k) {
+        var d = byId(curId); if (!d || d.ket_qua === k) return;
+        if (k === 'xong' && !d.bc.length) { openDone(curId, 'done'); return; }
+        var old = d.ket_qua; d.ket_qua = k; openDetail(curId); renderAll();
         rpc('setStatus', [curId, k]).then(function () { if (k === 'xong') { confetti(); toast('Hoàn thành! Làm tốt lắm'); offerNext(d); ensureAuto(); } }).catch(function (err) { d.ket_qua = old; openDetail(curId); renderAll(); toast(err.message); });
       } else if (v) {
         var ids = [].map.call($('dThumbs').querySelectorAll('.th'), function (t) { return t.getAttribute('data-fid'); });

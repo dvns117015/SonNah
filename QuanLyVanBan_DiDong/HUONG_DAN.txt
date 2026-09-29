@@ -49,6 +49,16 @@ KHI SỬA MÃ (Code.gs hoặc index.html) SAU NÀY
   Phải Triển khai > Quản lý bản triển khai > biểu tượng bút > Phiên bản: "Phiên bản mới" > Triển khai.
   Link giữ nguyên. Nếu chỉ lưu mà không tạo phiên bản mới thì người dùng vẫn thấy bản cũ.
 
+HOÀN THÀNH CẦN CÓ KẾT QUẢ ĐÍNH KÈM
+---------------------------------
+  - Bấm vào văn bản rồi chọn "Đã xong": ứng dụng mở màn hình đính kèm. Phải chụp ảnh hoặc tải lên ít nhất
+    một ảnh hoặc file PDF thì nút "Hoàn thành" mới bấm được. Có thể ghi chú kết quả.
+  - Văn bản đã có sẵn kết quả đính kèm thì chọn "Đã xong" được ngay.
+  - Trong chi tiết văn bản có mục "Kết quả đính kèm": xem ảnh, mở hoặc lưu file PDF, thêm ảnh/file.
+  - Trong form sửa văn bản, chọn "Đã xong" khi chưa có kết quả sẽ bị chặn; hãy làm từ màn hình chi tiết.
+  - Bản Claude: file PDF tối đa 2 MB (quá lớn thì chụp ảnh thay). Bản Google Sheet: lưu trong Drive.
+  - Đây là quy định trong ứng dụng, không phải khóa bảo mật tuyệt đối.
+
 THẺ CÁN BỘ
 ----------
   - Cài đặt > Danh sách cán bộ: thêm tên, mỗi tên là một thẻ màu. Bấm x trên thẻ để xóa khỏi danh sách.
