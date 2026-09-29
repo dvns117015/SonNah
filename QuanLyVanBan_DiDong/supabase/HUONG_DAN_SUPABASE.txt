@@ -1,0 +1,43 @@
+QUẢN LÝ VĂN BẢN BẰNG SUPABASE: CÀI ĐẶT CHỈ CẦN ĐIỆN THOẠI
+=========================================================
+Cán bộ chỉ cần mở một đường link trên điện thoại, đăng nhập bằng email và mật khẩu do bạn cấp.
+KHÔNG cần tài khoản Claude hay Google. Dữ liệu và ảnh lưu ở Supabase, trang web đặt ở GitHub Pages.
+Mức miễn phí của Supabase và GitHub có thể thay đổi, hãy xem lại trên trang của họ.
+
+PHẦN A. TẠO KHO DỮ LIỆU TRÊN SUPABASE (khoảng 10 phút)
+--------------------------------------------------------
+1. Mở supabase.com > Sign in (đăng nhập bằng tài khoản GitHub cho nhanh) > New project.
+   Đặt tên, tạo "Database password" (ghi lại), vùng chọn Southeast Asia (Singapore). Chờ khoảng 2 phút.
+2. Menu bên trái > SQL Editor > New query.
+   Mở file supabase.sql (trong thư mục QuanLyVanBan_DiDong/supabase của repo trên GitHub),
+   bấm "Raw", chọn hết, copy, dán vào SQL Editor, bấm Run. Thấy "Success" là xong.
+   (Chạy lại nhiều lần cũng không sao.)
+3. Menu > Authentication > Users > Add user > Create new user:
+   nhập email và mật khẩu, TÍCH "Auto Confirm User", tạo. Mỗi người một tài khoản hoặc dùng chung một tài khoản.
+4. Authentication > Sign In / Providers (hoặc Settings) > Email:
+   TẮT "Allow new users to sign up" để người lạ không tự tạo tài khoản. Lưu lại.
+5. Project Settings > API: copy "Project URL" và "anon public" key.
+   (anon key là khóa công khai, an toàn vì dữ liệu chỉ mở cho người đã đăng nhập.)
+
+PHẦN B. ĐƯA TRANG WEB LÊN GITHUB PAGES (khoảng 5 phút)
+------------------------------------------------------
+1. Trên GitHub mở repo, vào docs/config.js > biểu tượng cây bút > dán Project URL và anon key
+   vào giữa hai dấu nháy > Commit changes.
+   (Bỏ qua bước này cũng được: lần đầu mở trên mỗi điện thoại, ứng dụng sẽ hỏi và nhớ lại.)
+2. Repo > Settings > Pages > Source: "Deploy from a branch" > Branch: main, thư mục /docs > Save.
+   Repo cần ở chế độ Public (GitHub Pages cho repo riêng tư cần gói trả phí).
+3. Chờ 1 đến 2 phút, địa chỉ hiện ở đầu trang Pages, dạng https://<tên-github>.github.io/SonNah/
+4. Gửi link cho cán bộ. Mở link > đăng nhập > menu trình duyệt > "Thêm vào màn hình chính".
+
+SỬ DỤNG
+-------
+Giống bản đang dùng: chụp ảnh văn bản, hạn, nhắc việc, loại công việc và báo cáo định kỳ,
+thẻ cán bộ, Đã xong phải có ảnh hoặc file kết quả, danh sách ký nhận (mở ở tab mới rồi In), xuất CSV.
+Nhắc việc hiện trong trang mỗi lần mở; bản này chưa gửi email nhắc việc.
+
+GHI CHÚ
+-------
+- Đổi mật khẩu, thêm hoặc xóa tài khoản: Supabase > Authentication > Users.
+- Xem hoặc sao lưu dữ liệu: Supabase > Table Editor (bảng vanban, cauhinh). Ảnh nằm ở Storage > tep.
+- Sau khi tôi sửa mã, chạy lại build_web.py (hoặc nhờ tôi) để cập nhật thư mục docs.
+- Hiện tại dùng gói miễn phí thì dự án bị tạm dừng nếu không ai dùng trong vài tuần; vào Supabase bấm khôi phục.
