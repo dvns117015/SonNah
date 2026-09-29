@@ -51,6 +51,8 @@
     setStatus: function (id, k) { find(id).ket_qua = k; save(); return true; },
     deleteDoc: function (id) { var o = find(id); db.splice(db.indexOf(o), 1); save(); return true; },
     addPhoto: function (id, name, url) { var o = find(id), a = { id: 'p' + Date.now() + Math.random().toString(36).slice(2, 6), name: name }; photos[a.id] = url; o.anh.push(a); save(); return a; },
+    addProof: function (id, name, type, url) { var o = find(id), a = { id: 'r' + Date.now() + Math.random().toString(36).slice(2, 6), name: name, type: type }; photos[a.id] = url; o.bc = (o.bc || []).concat([a]); save(); return a; },
+    removeProof: function (id, fid) { var o = find(id); o.bc = (o.bc || []).filter(function (a) { return a.id !== fid; }); delete photos[fid]; save(); return true; },
     removePhoto: function (id, fid) { var o = find(id); o.anh = o.anh.filter(function (a) { return a.id !== fid; }); delete photos[fid]; save(); return true; },
     getPhoto: function (fid) { return photos[fid] || sample('ẢNH MẪU (đã hết phiên xem thử)', 1); },
     htmlToPdf: function () { throw new Error('Bản xem thử không tạo được file PDF. Bản thật tạo PDF trong Google Drive.'); },

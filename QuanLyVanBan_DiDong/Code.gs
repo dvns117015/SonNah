@@ -14,9 +14,9 @@ var CAU_HINH = {
 
 var TEN_TAB = 'VanBan';
 var COLS = ['id', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao',
-  'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'anh', 'tao_luc', 'sua_luc', 'loai', 'ky_sau'];
+  'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'anh', 'tao_luc', 'sua_luc', 'loai', 'ky_sau', 'bc'];
 var TIEU_DE = ['ID', 'Số văn bản', 'Ngày văn bản', 'Ngày nhận', 'Trích yếu', 'Nội dung công việc', 'Ý kiến chỉ đạo',
-  'Cán bộ thực hiện', 'Hạn', 'Kết quả', 'Ghi chú kết quả', 'Ảnh (mã file Drive)', 'Tạo lúc', 'Sửa lúc', 'Phân loại (mã)', 'Công việc kỳ sau (mã)'];
+  'Cán bộ thực hiện', 'Hạn', 'Kết quả', 'Ghi chú kết quả', 'Ảnh (mã file Drive)', 'Tạo lúc', 'Sửa lúc', 'Phân loại (mã)', 'Công việc kỳ sau (mã)', 'Kết quả đính kèm (mã file Drive)'];
 var KET_QUA = { chua: 'Chưa xong', dang: 'Đang thực hiện', xong: 'Đã xong', huy: 'Không thực hiện' };
 var TU_KHOA_EDIT = ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao',
   'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau'];
@@ -123,7 +123,7 @@ var API_ = {
   deleteDoc: function (id) {
     return voiKhoa_(function () {
       var sh = sheet_(), r = timDong_(sh, id);
-      layAnh_(sh, r).forEach(function (a) { try { DriveApp.getFileById(a.id).setTrashed(true); } catch (e) { } });
+      layAnh_(sh, r).concat(layAnh_(sh, r, 'bc')).forEach(function (a) { try { DriveApp.getFileById(a.id).setTrashed(true); } catch (e) { } });
       sh.deleteRow(r);
       return true;
     });
@@ -153,6 +153,28 @@ var API_ = {
       list.push(a);
       sh.getRange(r, COLS.indexOf('anh') + 1).setValue(JSON.stringify(list));
       return a;
+    });
+  },
+  addProof: function (id, name, type, dataUrl) {
+    var m = /^data:((?:image\/[a-z+.-]+)|application\/pdf);base64,(.+)$/i.exec(dataUrl || '');
+    if (!m) throw new Error('Chỉ nhận ảnh hoặc file PDF');
+    return voiKhoa_(function () {
+      var sh = sheet_(), r = timDong_(sh, id), ext = /pdf/i.test(m[1]) ? '.pdf' : '.jpg';
+      var fname = String(name || 'ket-qua').replace(/\.[A-Za-z0-9]{1,5}$/, '').slice(0, 80) + ext;
+      var f = folder_('THU_MUC_ANH').createFile(Utilities.newBlob(Utilities.base64Decode(m[2]), m[1], fname));
+      var list = layAnh_(sh, r, 'bc'), a = { id: f.getId(), name: fname, type: m[1].toLowerCase() };
+      list.push(a);
+      sh.getRange(r, COLS.indexOf('bc') + 1).setValue(JSON.stringify(list));
+      return a;
+    });
+  },
+  removeProof: function (id, fileId) {
+    return voiKhoa_(function () {
+      var sh = sheet_(), r = timDong_(sh, id);
+      var list = layAnh_(sh, r, 'bc').filter(function (a) { return a.id !== fileId; });
+      sh.getRange(r, COLS.indexOf('bc') + 1).setValue(JSON.stringify(list));
+      try { DriveApp.getFileById(fileId).setTrashed(true); } catch (e) { }
+      return true;
     });
   },
   removePhoto: function (id, fileId) {
@@ -249,6 +271,7 @@ function docHet_() {
     try { o.anh = JSON.parse(o.anh || '[]'); } catch (e) { o.anh = []; }
     o.tao_luc = String(o.tao_luc); o.sua_luc = String(o.sua_luc);
     o.loai = String(o.loai || 'vb'); o.ky_sau = String(o.ky_sau || '');
+    try { o.bc = JSON.parse(o.bc || '[]'); } catch (e) { o.bc = []; }
     return o;
   });
 }
@@ -267,14 +290,14 @@ function chen_(sh, row, id) {
   var t = bayGio_();
   var vals = COLS.map(function (c) {
     if (c === 'id') return id;
-    if (c === 'anh') return '[]';
+    if (c === 'anh' || c === 'bc') return '[]';
     if (c === 'tao_luc' || c === 'sua_luc') return t;
     return row[c] == null ? '' : row[c];
   });
   sh.getRange(sh.getLastRow() + 1, 1, 1, COLS.length).setNumberFormat('@').setValues([vals]);
 }
-function layAnh_(sh, r) {
-  try { return JSON.parse(sh.getRange(r, COLS.indexOf('anh') + 1).getValue() || '[]'); } catch (e) { return []; }
+function layAnh_(sh, r, col) {
+  try { return JSON.parse(sh.getRange(r, COLS.indexOf(col || 'anh') + 1).getValue() || '[]'); } catch (e) { return []; }
 }
 function luu_(d) {
   return voiKhoa_(function () {
