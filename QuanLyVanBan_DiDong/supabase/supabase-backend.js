@@ -4,6 +4,7 @@
   var T = 'vanban', C = 'cauhinh', BUCKET = 'tep';
   var sb = null, initP = null, rtTimer = null;
   window.PROOF_MAX_BYTES = 10 * 1024 * 1024;
+  window.FEATURES = { trash: true, audit: true, backup: true };
 
   function cfg() {
     var c = window.SUPABASE_CONFIG || {};
@@ -103,6 +104,10 @@
   function norm(o) { o = JSON.parse(JSON.stringify(o)); o.anh = o.anh || []; o.bc = o.bc || []; o.tao_luc = String(o.tao_luc || ''); o.sua_luc = String(o.sua_luc || ''); return o; }
   var TEXT = ['so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau'];
   var KQ = { chua: 1, dang: 1, xong: 1, huy: 1 };
+  async function upd(id, patch) {
+    var rows = await run(function () { return sb.from(T).update(patch).eq('id', id).select('id'); });
+    if (!rows || !rows.length) throw new Error('Bạn không có quyền sửa văn bản này, hoặc văn bản không còn tồn tại.');
+  }
   function getRow(id, cols) { return run(function () { return sb.from(T).select(cols).eq('id', id).maybeSingle(); }); }
   async function upload(id, name, blob, ext) {
     var path = id + '/' + rid() + '.' + ext;
@@ -113,13 +118,13 @@
     var row = await getRow(id, col);
     if (!row) throw new Error('Không tìm thấy văn bản');
     var list = (row[col] || []).concat([entry]), patch = { sua_luc: now() }; patch[col] = list;
-    await run(function () { return sb.from(T).update(patch).eq('id', id); });
+    await upd(id, patch);
     return entry;
   }
   async function removeFrom(col, id, path) {
     var row = await getRow(id, col), patch = { sua_luc: now() };
     patch[col] = ((row && row[col]) || []).filter(function (a) { return a.id !== path; });
-    await run(function () { return sb.from(T).update(patch).eq('id', id); });
+    await upd(id, patch);
     await run(function () { return sb.storage.from(BUCKET).remove([path]); });
     return true;
   }
@@ -148,37 +153,76 @@
   function setCfg(key, value) { return run(function () { return sb.from(C).upsert({ key: key, value: value }); }).then(function () { return true; }); }
 
   var F = {
-    getAll: async function () { var rows = await run(function () { return sb.from(T).select('*'); }); return (rows || []).map(norm); },
-    getInfo: async function () { return { sheetUrl: '', email: '', gio: 0, soNgay: 3, pass: true, note: '' }; },
+    getAll: async function () { var rows = await run(function () { return sb.from(T).select('*').is('da_xoa', null); }); return (rows || []).map(norm); },
+    getTrash: async function () { var rows = await run(function () { return sb.from(T).select('*').not('da_xoa', 'is', null); }); return (rows || []).map(norm).sort(function (a, b) { return String(b.da_xoa) < String(a.da_xoa) ? -1 : 1; }); },
+    getInfo: async function () {
+      var row = await run(function () { return sb.from('nhanvien').select('ten,vai_tro').maybeSingle(); });
+      var u = await sb.auth.getUser();
+      return { sheetUrl: '', email: '', gio: 0, soNgay: 3, pass: true, note: '', role: (row && row.vai_tro) || '', ten: (row && row.ten) || '', account: (u.data && u.data.user && u.data.user.email) || '' };
+    },
     saveDoc: async function (d) {
       var o = {};
       TEXT.forEach(function (k) { if (d[k] !== undefined) o[k] = String(d[k] == null ? '' : d[k]).trim(); });
       if ('ket_qua' in o && !KQ[o.ket_qua]) o.ket_qua = 'chua';
       if ('loai' in o && !o.loai) o.loai = 'vb';
       if (d.id) {
-        if ('so_van_ban' in o && 'trich_yeu' in o && !o.so_van_ban && !o.trich_yeu) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
+        if ('trich_yeu' in o && !o.trich_yeu) throw new Error('Nhập trích yếu của văn bản');
         o.sua_luc = now();
-        await run(function () { return sb.from(T).update(o).eq('id', d.id); });
+        await upd(d.id, o);
         return { id: d.id };
       }
       TEXT.forEach(function (k) { if (!(k in o)) o[k] = ''; });
       if (!o.ket_qua) o.ket_qua = 'chua';
       if (!o.loai) o.loai = 'vb';
-      if (!o.trich_yeu && !o.so_van_ban) throw new Error('Nhập ít nhất số văn bản hoặc trích yếu');
+      if (!o.trich_yeu) throw new Error('Nhập trích yếu của văn bản');
       o.id = rid();
       await run(function () { return sb.from(T).insert(o); });
       return { id: o.id };
     },
     setStatus: async function (id, k) {
       if (!KQ[k]) throw new Error('Kết quả không hợp lệ');
-      await run(function () { return sb.from(T).update({ ket_qua: k, sua_luc: now() }).eq('id', id); });
+      await upd(id, { ket_qua: k, sua_luc: now() });
       return true;
     },
-    deleteDoc: async function (id) {
+    exportAll: async function (withFiles) {
+      var rows = await run(function () { return sb.from(T).select('*'); });
+      var cfgs = await run(function () { return sb.from(C).select('*'); });
+      var out = { app: 'quan-ly-van-ban', version: 1, at: now(), vanban: (rows || []).map(norm), cauhinh: cfgs || [], files: {} };
+      if (withFiles) {
+        var paths = [];
+        out.vanban.forEach(function (d) { d.anh.concat(d.bc).forEach(function (a) { if (paths.indexOf(a.id) < 0) paths.push(a.id); }); });
+        for (var i = 0; i < paths.length; i++) {
+          try { out.files[paths[i]] = await F.getPhoto(paths[i]); } catch (e) { }
+        }
+      }
+      return out;
+    },
+    importAll: async function (obj) {
+      if (!obj || obj.app !== 'quan-ly-van-ban' || !obj.vanban) throw new Error('Không phải file sao lưu của ứng dụng này');
+      var cols = ['id', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau', 'anh', 'bc', 'da_xoa', 'tao_luc'];
+      var rows = obj.vanban.map(function (d) { var o = {}; cols.forEach(function (k) { if (d[k] !== undefined) o[k] = d[k]; }); return o; });
+      for (var i = 0; i < rows.length; i += 50) {
+        var part = rows.slice(i, i + 50);
+        await run(function () { return sb.from(T).upsert(part, { onConflict: 'id' }); });
+      }
+      var cf = (obj.cauhinh || []).filter(function (c) { return c && (c.key === 'loai' || c.key === 'canbo'); });
+      if (cf.length) await run(function () { return sb.from(C).upsert(cf.map(function (c) { return { key: c.key, value: c.value }; })); });
+      var n = 0, files = obj.files || {};
+      for (var p in files) {
+        var blob = toBlob(files[p]);
+        await run(function () { return sb.storage.from(BUCKET).upload(p, blob, { contentType: blob.type, upsert: true }); });
+        n++;
+      }
+      return { vanban: rows.length, files: n };
+    },
+    deleteDoc: async function (id) { await upd(id, { da_xoa: now() }); return true; },
+    restoreDoc: async function (id) { await upd(id, { da_xoa: null }); return true; },
+    purgeDoc: async function (id) {
       var row = await getRow(id, 'anh,bc');
       var paths = ((row && row.anh) || []).concat((row && row.bc) || []).map(function (a) { return a.id; });
       if (paths.length) await run(function () { return sb.storage.from(BUCKET).remove(paths); });
-      await run(function () { return sb.from(T).delete().eq('id', id); });
+      var gone = await run(function () { return sb.from(T).delete().eq('id', id).select('id'); });
+      if (!gone || !gone.length) throw new Error('Bạn không có quyền xóa văn bản này.');
       return true;
     },
     createAuto: async function (d) {

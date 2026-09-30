@@ -1,0 +1,19 @@
+# Gọi Supabase mỗi ngày để dự án gói miễn phí không bị tạm dừng vì lâu không có người dùng.
+# Chỉ gửi một yêu cầu đọc bằng khóa công khai (anon key); dữ liệu vẫn được bảo vệ bởi phân quyền theo hàng.
+name: Giữ Supabase hoạt động
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gọi Supabase
+        run: |
+          URL=$(sed -n "s/.*url: '\([^']*\)'.*/\1/p" docs/config.js)
+          KEY=$(sed -n "s/.*anonKey: '\([^']*\)'.*/\1/p" docs/config.js)
+          test -n "$URL" && test -n "$KEY"
+          curl -fsS "$URL/rest/v1/cauhinh?select=key&limit=1" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -o /dev/null -w "HTTP %{http_code}\n"
+    permissions:
+      contents: read
