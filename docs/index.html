@@ -199,6 +199,53 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
 .frow .rmx{border:0;background:rgba(0,0,0,.1);color:inherit;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;line-height:1}
 .g-ok{--gc:var(--mint)}
 .donebox{background:var(--green-soft);color:var(--green);border-radius:16px;padding:12px 14px;font-weight:600;font-size:14px}
+.viewsw{margin-top:-26px;position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface);border-radius:18px;padding:6px;box-shadow:var(--shadow-pop)}
+.viewsw button{border:0;background:transparent;color:var(--muted);font-weight:700;border-radius:13px;padding:10px 8px;min-height:44px;cursor:pointer}
+.viewsw button[aria-pressed="true"]{background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:#fff}
+.wrap.hassw .searchwrap{margin-top:12px}
+.dchips{display:flex;gap:8px;overflow-x:auto;padding-block:14px 4px;scrollbar-width:none}
+.dchips::-webkit-scrollbar{display:none}
+.dchips button{flex:none;border:0;background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+.dchips button[aria-pressed="true"]{background:var(--brand);color:var(--on-brand)}
+.dnote{font-size:12.5px;color:var(--muted);margin:6px 2px 0}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-block:12px 4px}
+.kpi{--kc:var(--brand);--kb:var(--brand-soft);border:0;text-align:left;background:var(--kb);color:var(--kc);border-radius:18px;padding:12px 14px;cursor:pointer;display:grid;gap:2px}
+.kpi small{font-size:12.5px;font-weight:700;color:var(--ink);opacity:.8}
+.kpi b{font-family:var(--display);font-size:32px;line-height:1.05;font-weight:800}
+.kpi span{font-size:12px;color:var(--ink);opacity:.7}
+.kpi.k-late{--kc:var(--red);--kb:var(--red-soft)}
+.kpi.k-soon{--kc:var(--amber);--kb:var(--amber-soft)}
+.kpi.k-done{--kc:var(--green);--kb:var(--green-soft)}
+.kpi.k-wide{grid-column:1/-1;grid-template-columns:auto 1fr;align-items:center;gap:6px 16px}
+.kpi .bar{grid-column:1/-1;height:12px;border-radius:6px;background:rgba(255,255,255,.55);overflow:hidden;display:flex}
+.kpi .bar i{display:block;height:100%}
+.dsec{padding-block:14px 0}
+.dsec h3{margin:0 2px 8px;font-family:var(--display);font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px}
+.dsec h3::before{content:"";width:9px;height:20px;border-radius:5px;background:var(--gc,var(--brand))}
+.dsec h3 em{font-style:normal;font-family:var(--font);font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--grey-soft);color:var(--grey)}
+.dsec.s-late{--gc:var(--red)}.dsec.s-soon{--gc:var(--amber)}.dsec.s-per{--gc:var(--violet)}.dsec.s-done{--gc:var(--green)}
+.dsort{display:flex;gap:8px;margin:0 0 8px}
+.dsort button{border:0;background:var(--grey-soft);color:var(--grey);border-radius:999px;padding:6px 12px;font-weight:600;font-size:13px;cursor:pointer}
+.dsort button[aria-pressed="true"]{background:var(--brand-soft);color:var(--brand)}
+.pcard{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
+.phead{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:12px 14px;width:100%;border:0;background:none;text-align:left;cursor:pointer}
+.phead .av{width:40px;height:40px;border-radius:50%;background:var(--pc,var(--c4));color:var(--surface);display:grid;place-items:center;font-weight:800;font-size:16px;grid-row:span 2}
+.phead .nm{font-weight:700;font-size:15.5px;overflow-wrap:anywhere}
+.phead .sub{font-size:12.5px;color:var(--muted)}
+.badge{font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.badge.bad{background:var(--red);color:var(--surface)}
+.badge.good{background:var(--green-soft);color:var(--green)}
+.pbar{grid-column:1/-1;display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--grey-soft)}
+.pbar i{display:block;height:100%}
+.pnums{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted)}
+.pnums b{color:var(--ink)}.pnums .r{color:var(--red);font-weight:800}
+.plist{padding:0 12px 12px;display:grid;gap:8px}
+.jrow{background:var(--bg);border-radius:14px;padding:10px 12px;cursor:pointer;display:grid;gap:5px}
+.jrow.late{background:var(--red-soft)}
+.jrow.late .pill,.jrow.late .chip-m{background:var(--surface)}
+.jrow.late .chip-m.late-t{color:var(--red)}
+.jrow .t{font-weight:600;font-size:14.5px;overflow-wrap:anywhere}
+.jrow .m{display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center}
 .viewer{position:fixed;inset:0;z-index:40;background:#000;display:grid;grid-template-rows:auto 1fr auto}
 .viewer .vt{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;color:#fff}
 .viewer .vt button,.viewer .vb button{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:12px;padding:11px 18px;font-weight:600;cursor:pointer}
@@ -262,7 +309,12 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       <div id="demoNote" class="demo" hidden></div>
     </div>
   </header>
-  <div class="wrap">
+  <div class="wrap" id="homeWrap">
+    <div class="viewsw" id="viewSw" hidden>
+      <button type="button" data-view="dash" aria-pressed="false">Tổng quan</button>
+      <button type="button" data-view="list" aria-pressed="true">Danh sách</button>
+    </div>
+    <div id="dash" hidden></div>
     <div class="searchwrap"><div class="search">
       <input class="field" id="q" type="search" placeholder="Tìm số văn bản, trích yếu, chỉ đạo..." aria-label="Tìm kiếm">
       <button class="ib" id="btnFilter" aria-label="Bộ lọc" title="Bộ lọc"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span class="dot" id="fDot" hidden></span></button>
@@ -506,7 +558,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
 <script>/* Kho dữ liệu cho bản chạy trên web riêng (GitHub Pages) dùng Supabase:
    dữ liệu trong bảng vanban/cauhinh, ảnh và PDF trong kho "tep", đăng nhập bằng email + mật khẩu do quản trị tạo. */
 (function () {
-  var T = 'vanban', C = 'cauhinh', BUCKET = 'tep';
+  var T = 'vanban', C = 'cauhinh', BUCKET = 'tep', LOGIN_DOMAIN = 'vanban.local';
   var sb = null, initP = null, rtTimer = null;
   window.PROOF_MAX_BYTES = 10 * 1024 * 1024;
   window.FEATURES = { trash: true, audit: true, backup: true, push: true };
@@ -538,16 +590,18 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   }
   function loginUI(msg) {
     return new Promise(function (resolve) {
-      var m = overlay('<p><b>Đăng nhập</b></p><p class="tip">Dùng email và mật khẩu do người quản trị cấp.</p>' +
-        '<input class="field" id="lgEmail" type="email" placeholder="Email" autocapitalize="off" autocomplete="username">' +
+      var m = overlay('<p><b>Đăng nhập</b></p><p class="tip">Dùng tên đăng nhập (hoặc email) và mật khẩu do người quản trị cấp.</p>' +
+        '<input class="field" id="lgEmail" type="text" placeholder="Tên đăng nhập hoặc email" autocapitalize="off" autocorrect="off" autocomplete="username">' +
         '<input class="field" id="lgPass" type="password" placeholder="Mật khẩu" autocomplete="current-password">' +
         '<p class="tip" id="lgErr" style="color:var(--red)" ' + (msg ? '' : 'hidden') + '>' + esc(msg || '') + '</p>' +
         '<div class="acts"><button class="btn primary" id="lgGo">Vào</button></div>');
       var go = function () {
         var b = m.querySelector('#lgGo'), err = m.querySelector('#lgErr');
         b.disabled = true; b.textContent = 'Đang vào...';
-        sb.auth.signInWithPassword({ email: m.querySelector('#lgEmail').value.trim(), password: m.querySelector('#lgPass').value }).then(function (r) {
-          if (r.error) { err.hidden = false; err.textContent = /invalid/i.test(r.error.message) ? 'Sai email hoặc mật khẩu.' : r.error.message; b.disabled = false; b.textContent = 'Vào'; return; }
+        var user = m.querySelector('#lgEmail').value.trim();
+        if (user.indexOf('@') < 0) user = user.toLowerCase() + '@' + LOGIN_DOMAIN;   // gõ "son" thì đăng nhập bằng son@vanban.local
+        sb.auth.signInWithPassword({ email: user, password: m.querySelector('#lgPass').value }).then(function (r) {
+          if (r.error) { err.hidden = false; err.textContent = /invalid/i.test(r.error.message) ? 'Sai tên đăng nhập hoặc mật khẩu.' : r.error.message; b.disabled = false; b.textContent = 'Vào'; return; }
           document.body.removeChild(m); resolve();
         }, function (e) { err.hidden = false; err.textContent = 'Không kết nối được. Kiểm tra mạng.'; b.disabled = false; b.textContent = 'Vào'; });
       };
@@ -728,7 +782,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
     },
     importAll: async function (obj) {
       if (!obj || obj.app !== 'quan-ly-van-ban' || !obj.vanban) throw new Error('Không phải file sao lưu của ứng dụng này');
-      var cols = ['id', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau', 'anh', 'bc', 'da_xoa', 'tao_luc'];
+      var cols = ['id', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau', 'anh', 'bc', 'da_xoa', 'tao_luc', 'xong_luc'];
       var rows = obj.vanban.map(function (d) { var o = {}; cols.forEach(function (k) { if (d[k] !== undefined) o[k] = d[k]; }); return o; });
       for (var i = 0; i < rows.length; i += 50) {
         var part = rows.slice(i, i + 50);
@@ -824,6 +878,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   var DEFAULT_LOAI = [{ id: 'vb', name: 'Văn bản thường', ky: '' }, { id: 'bctuan', name: 'Báo cáo tuần', ky: 'tuan', ngay: 5 }, { id: 'bcthang', name: 'Báo cáo tháng', ky: 'thang', ngay: 0 }, { id: 'bcquy', name: 'Báo cáo quý', ky: 'quy', thang: 3, ngay: 0 }, { id: 'bc6thang', name: 'Báo cáo 6 tháng', ky: '6thang', thang: 6, ngay: 0 }, { id: 'bcnam', name: 'Báo cáo năm', ky: 'nam', thang: 12, ngay: 0 }];
     var loai = DEFAULT_LOAI.slice();
   var canbo = [];
+  var viewMode = 'list', dashPeriod = 'all', dashSort = 'late', dashOpen = {};
   var me = { role: '', ten: '', account: '' };
   function canEdit() { return !me.role || me.role === 'quan_tri' || me.role === 'van_thu'; }
   function isMine(d) { return !!me.ten && d.can_bo.toLowerCase().indexOf(me.ten.toLowerCase()) >= 0; }
@@ -945,6 +1000,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       if (first) setTimeout(syncPush, 1500);
       me.role = inf.role || ''; me.ten = inf.ten || ''; me.account = inf.account || ''; me.loaded = true;
       if (first && me.role === 'can_bo' && me.ten) F.tab = 'mine';
+      if (first && me.role === 'lanh_dao') viewMode = 'dash';
       docs = JSON.parse(JSON.stringify(r[0])); docs.forEach(function (d) { if (!d.loai) d.loai = 'vb'; if (!d.bc) d.bc = []; });
       canbo = (r[2] && r[2].length) ? r[2] : namesFromDocs();
       loai = (r[1] && r[1].length) ? r[1] : DEFAULT_LOAI.slice(); applyRole(); renderAll(); if (canEdit()) ensureAuto();
@@ -992,7 +1048,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
     doc: '<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
     rep: '<svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>'
   };
-  function renderAll() { renderHero(); renderLoaiSelects(); renderTabs(); renderRemind(); renderList(); renderCb(); document.title = (lateCount() ? '(' + lateCount() + ') ' : '') + 'Quản lý văn bản'; }
+  function renderAll() { applyView(); renderHero(); renderLoaiSelects(); renderTabs(); renderRemind(); renderList(); renderCb(); document.title = (lateCount() ? '(' + lateCount() + ') ' : '') + 'Quản lý văn bản'; }
   function lateCount() { var t = todayStr(); return docs.filter(function (d) { return isOpen(d) && d.han && d.han < t; }).length; }
   function renderTabs() {
     var t = todayStr();
@@ -1455,6 +1511,122 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
     if (!(window.FEATURES && window.FEATURES.push) || !pushSupported() || Notification.permission !== 'granted') return;
     getSub().then(function (sub) { if (sub) rpc('pushSave', [sub.toJSON()]).catch(function () { }); }).catch(function () { });
   }
+  // ---- Tổng quan (lãnh đạo theo dõi tiến độ) ----
+  function dashAllowed() { return me.role !== 'can_bo'; }
+  function personsOf(d) {
+    var ns = d.can_bo.split(/[;,]/).map(function (x) { return x.trim(); }).filter(Boolean);
+    return ns.length ? ns : ['(Chưa giao)'];
+  }
+  function lateDays(d) { return isOpen(d) && d.han ? -daysLeft(d.han) : 0; }
+  function doneLateDays(d) {
+    if (d.ket_qua !== 'xong' || !d.han || !d.xong_luc) return 0;
+    var x = new Date(d.xong_luc); if (isNaN(x)) return 0;
+    var xs = iso(x); return xs > d.han ? Math.round((parseIso(xs) - parseIso(d.han)) / 864e5) : 0;
+  }
+  function periodRange(p) {
+    var t = new Date(), y = t.getFullYear(), m = t.getMonth();
+    if (p === 'week') { var dow = (t.getDay() + 6) % 7, a = new Date(y, m, t.getDate() - dow), b = new Date(y, m, t.getDate() - dow + 6); return [iso(a), iso(b), 'Tuần này']; }
+    if (p === 'month') return [iso(new Date(y, m, 1)), iso(new Date(y, m + 1, 0)), 'Tháng ' + (m + 1) + '/' + y];
+    if (p === 'quarter') { var q = Math.floor(m / 3); return [iso(new Date(y, q * 3, 1)), iso(new Date(y, q * 3 + 3, 0)), 'Quý ' + (q + 1) + '/' + y]; }
+    return null;
+  }
+  function dashDocs() {
+    var r = periodRange(dashPeriod);
+    return docs.filter(function (d) {
+      if (d.ket_qua === 'huy') return false;
+      if (!r) return true;
+      if (!d.han) return false;
+      return (d.han >= r[0] && d.han <= r[1]) || (isOpen(d) && d.han < r[0]);
+    });
+  }
+  function renderDash() {
+    var box = $('dash'), list = dashDocs(), t = todayStr(), r = periodRange(dashPeriod);
+    var xong = list.filter(function (d) { return d.ket_qua === 'xong'; }).length;
+    var dang = list.filter(function (d) { return d.ket_qua === 'dang'; }).length;
+    var chua = list.filter(function (d) { return d.ket_qua === 'chua'; }).length;
+    var late = list.filter(function (d) { return lateDays(d) > 0; });
+    var soon = list.filter(function (d) { return isOpen(d) && d.han && daysLeft(d.han) >= 0 && daysLeft(d.han) <= 3; });
+    var lateDone = list.filter(function (d) { return doneLateDays(d) > 0; });
+    var tong = list.length, pct = tong ? Math.round(xong * 100 / tong) : 0;
+    function seg(n, col) { return n ? '<i style="width:' + (n * 100 / Math.max(tong, 1)) + '%;background:' + col + '"></i>' : ''; }
+    var h = '<div class="dchips">' + [['all', 'Tất cả'], ['week', 'Tuần này'], ['month', 'Tháng này'], ['quarter', 'Quý này']].map(function (x) {
+      return '<button type="button" data-period="' + x[0] + '" aria-pressed="' + (dashPeriod === x[0]) + '">' + x[1] + '</button>';
+    }).join('') + '</div>';
+    h += '<div class="dnote">' + (r ? esc(r[2]) + ' (' + vn(r[0]) + ' đến ' + vn(r[1]) + '): gồm việc có hạn trong kỳ và việc quá hạn chưa xong từ trước. ' : 'Tất cả việc đang theo dõi. ') + 'Không tính việc "Không thực hiện".</div>';
+    h += '<div class="kpi-grid">' +
+      '<button type="button" class="kpi k-wide k-done" data-go="all"><small>Tiến độ hoàn thành</small><b>' + pct + '%</b><span>' + xong + ' / ' + tong + ' việc đã xong</span>' +
+      '<div class="bar">' + seg(xong, 'var(--green)') + seg(dang, 'var(--amber)') + seg(chua, 'var(--grey)') + '</div></button>' +
+      '<button type="button" class="kpi k-late" data-go="late"><small>Quá hạn chưa xong</small><b>' + late.length + '</b><span>cần xử lý ngay</span></button>' +
+      '<button type="button" class="kpi k-soon" data-go="open"><small>Sắp đến hạn (3 ngày)</small><b>' + soon.length + '</b><span>gồm cả hạn hôm nay</span></button>' +
+      '<button type="button" class="kpi" data-go="open"><small>Đang làm</small><b>' + dang + '</b><span>đang thực hiện</span></button>' +
+      '<button type="button" class="kpi" data-go="open" style="--kc:var(--grey);--kb:var(--grey-soft)"><small>Chưa làm</small><b>' + chua + '</b><span>chưa bắt đầu</span></button>' +
+      '</div>';
+
+    // theo từng cán bộ
+    var map = {};
+    list.forEach(function (d) {
+      personsOf(d).forEach(function (n) {
+        var p = map[n] || (map[n] = { name: n, tong: 0, xong: 0, dang: 0, chua: 0, quaHan: 0, treXong: 0, jobs: [] });
+        p.tong++; p[d.ket_qua === 'xong' ? 'xong' : (d.ket_qua === 'dang' ? 'dang' : 'chua')]++;
+        if (lateDays(d) > 0) p.quaHan++;
+        if (doneLateDays(d) > 0) p.treXong++;
+        p.jobs.push(d);
+      });
+    });
+    var ps = Object.keys(map).map(function (k) { return map[k]; });
+    ps.sort(function (a, b) {
+      if (a.name === '(Chưa giao)' || b.name === '(Chưa giao)') return (a.name === '(Chưa giao)') - (b.name === '(Chưa giao)');
+      if (dashSort === 'name') return a.name.localeCompare(b.name, 'vi');
+      return (b.quaHan - a.quaHan) || ((b.chua + b.dang) - (a.chua + a.dang)) || a.name.localeCompare(b.name, 'vi');
+    });
+    h += '<div class="dsec s-per"><h3>Tiến độ theo cán bộ <em>' + ps.length + '</em></h3>' +
+      '<div class="dsort"><button type="button" data-sort="late" aria-pressed="' + (dashSort === 'late') + '">Trễ nhiều nhất trước</button><button type="button" data-sort="name" aria-pressed="' + (dashSort === 'name') + '">Tên A đến Z</button></div>';
+    h += ps.length ? ps.map(function (p) {
+      var openN = p.chua + p.dang, expanded = !!dashOpen[p.name];
+      var jobs = p.jobs.slice().sort(function (a, b) {
+        var ao = isOpen(a) ? 0 : 1, bo = isOpen(b) ? 0 : 1;
+        return (ao - bo) || ((a.han || '9999') < (b.han || '9999') ? -1 : 1);
+      });
+      return '<div class="pcard"><button type="button" class="phead" data-toggle="' + esc(p.name) + '" style="' + nameStyle(p.name) + '" aria-expanded="' + expanded + '">' +
+        '<span class="av">' + esc(initial(p.name)) + '</span><span class="nm">' + esc(p.name) + '</span>' +
+        (p.quaHan ? '<span class="badge bad">' + p.quaHan + ' quá hạn</span>' : '<span class="badge good">' + (openN ? 'Đúng hạn' : 'Xong hết') + '</span>') +
+        '<span class="sub">' + p.tong + ' việc, đã xong ' + Math.round(p.xong * 100 / p.tong) + '%' + (p.treXong ? ', ' + p.treXong + ' xong trễ' : '') + '</span>' +
+        '<span class="pbar">' + (p.xong ? '<i style="width:' + p.xong * 100 / p.tong + '%;background:var(--green)"></i>' : '') + (p.dang ? '<i style="width:' + p.dang * 100 / p.tong + '%;background:var(--amber)"></i>' : '') + (p.chua ? '<i style="width:' + p.chua * 100 / p.tong + '%;background:var(--grey)"></i>' : '') + '</span>' +
+        '<span class="pnums"><span>Xong <b>' + p.xong + '</b></span><span>Đang <b>' + p.dang + '</b></span><span>Chưa <b>' + p.chua + '</b></span>' + (p.quaHan ? '<span class="r">Quá hạn ' + p.quaHan + '</span>' : '') + '</span></button>' +
+        (expanded ? '<div class="plist">' + jobs.map(function (d) { return jobRow(d); }).join('') + '</div>' : '') + '</div>';
+    }).join('') : '<div class="empty">Chưa có việc nào để theo dõi.</div>';
+    h += '</div>';
+
+    // danh sách quá hạn
+    late.sort(function (a, b) { return lateDays(b) - lateDays(a); });
+    h += '<div class="dsec s-late"><h3>Việc quá hạn chưa xong <em>' + late.length + '</em></h3>' +
+      (late.length ? '<div class="plist" style="padding:0">' + late.map(function (d) { return jobRow(d, true); }).join('') + '</div>' : '<div class="tip">Không có việc nào quá hạn.</div>') + '</div>';
+    soon.sort(function (a, b) { return a.han < b.han ? -1 : 1; });
+    h += '<div class="dsec s-soon"><h3>Sắp đến hạn trong 3 ngày <em>' + soon.length + '</em></h3>' +
+      (soon.length ? '<div class="plist" style="padding:0">' + soon.map(function (d) { return jobRow(d, true); }).join('') + '</div>' : '<div class="tip">Không có việc nào sắp đến hạn.</div>') + '</div>';
+    if (lateDone.length) {
+      lateDone.sort(function (a, b) { return doneLateDays(b) - doneLateDays(a); });
+      h += '<div class="dsec s-done"><h3>Hoàn thành trễ hạn <em>' + lateDone.length + '</em></h3><div class="plist" style="padding:0">' + lateDone.map(function (d) { return jobRow(d, true); }).join('') + '</div></div>';
+    }
+    box.innerHTML = h;
+  }
+  function jobRow(d, withWho) {
+    var ld = lateDays(d), dl = doneLateDays(d), chip;
+    if (ld > 0) chip = '<span class="chip-m late-t">Hạn ' + vn(d.han) + ', trễ ' + ld + ' ngày</span>';
+    else if (dl > 0) chip = '<span class="chip-m late-t">Hạn ' + vn(d.han) + ', xong trễ ' + dl + ' ngày</span>';
+    else if (isOpen(d) && d.han) { var n = daysLeft(d.han); chip = '<span class="chip-m ' + (n <= 3 ? 'soon-t' : '') + '">Hạn ' + vn(d.han) + (n === 0 ? ', hôm nay' : ', còn ' + n + ' ngày') + '</span>'; }
+    else chip = '<span class="chip-m">' + (d.han ? 'Hạn ' + vn(d.han) : 'Chưa đặt hạn') + '</span>';
+    return '<div class="jrow ' + (ld > 0 ? 'late' : '') + '" data-open="' + esc(d.id) + '"><div class="t">' + esc(d.trich_yeu || d.so_van_ban || '(Chưa có trích yếu)') + '</div>' +
+      '<div class="m">' + chip + '<span class="pill st-' + d.ket_qua + '">' + STATUS[d.ket_qua] + '</span>' + (withWho ? '<span class="chip-m who">' + IC.user + esc(personsOf(d).join(', ')) + '</span>' : '') + '</div></div>';
+  }
+  function applyView() {
+    var allow = dashAllowed(), dash = allow && viewMode === 'dash';
+    $('viewSw').hidden = !allow; $('homeWrap').classList.toggle('hassw', allow);
+    [].forEach.call($('viewSw').querySelectorAll('button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === (dash ? 'dash' : 'list'))); });
+    $('dash').hidden = !dash;
+    [].forEach.call(document.querySelectorAll('#homeWrap .searchwrap, #homeWrap #tabs, #homeWrap #list, #homeWrap #remind'), function (e) { if (dash) e.style.display = 'none'; else e.style.display = ''; });
+    if (dash) renderDash();
+  }
   function openTrash() {
     show('scrTrash');
     return rpc('getTrash').then(function (l) {
@@ -1510,6 +1682,15 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       var c = e.target.closest ? e.target.closest('[data-close]') : null;
       if (c) hide(c.getAttribute('data-close'));
     });
+    $('viewSw').onclick = function (e) { var v = e.target.getAttribute('data-view'); if (v) { viewMode = v; applyView(); window.scrollTo(0, 0); } };
+    $('dash').onclick = function (e) {
+      var t = e.target, el;
+      if ((el = t.closest('[data-period]'))) { dashPeriod = el.getAttribute('data-period'); renderDash(); }
+      else if ((el = t.closest('[data-sort]'))) { dashSort = el.getAttribute('data-sort'); renderDash(); }
+      else if ((el = t.closest('[data-toggle]'))) { var k = el.getAttribute('data-toggle'); dashOpen[k] = !dashOpen[k]; renderDash(); }
+      else if ((el = t.closest('[data-open]'))) { openDetail(el.getAttribute('data-open')); }
+      else if ((el = t.closest('[data-go]'))) { F.tab = el.getAttribute('data-go'); viewMode = 'list'; applyView(); renderTabs(); renderList(); window.scrollTo(0, 0); }
+    };
     $('fab').onclick = function () { if (canEdit()) openForm(null); };
     $('camera').onchange = function () { addFiles(this.files); this.value = ''; };
     $('gallery').onchange = function () { addFiles(this.files); this.value = ''; };

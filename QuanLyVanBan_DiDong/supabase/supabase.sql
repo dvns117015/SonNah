@@ -28,6 +28,7 @@ create table if not exists public.vanban (
 alter table public.vanban add column if not exists nguoi_tao text not null default '';
 alter table public.vanban add column if not exists nguoi_sua text not null default '';
 alter table public.vanban add column if not exists da_xoa timestamptz;   -- có giá trị = đang ở thùng rác
+alter table public.vanban add column if not exists xong_luc timestamptz;  -- giờ chuyển sang Đã xong (để biết hoàn thành trễ hạn)
 create index if not exists vanban_han_idx on public.vanban (han);
 
 -- 2) Bảng cấu hình (danh sách loại công việc, danh sách cán bộ)
@@ -123,16 +124,22 @@ create or replace function private.ghi_vet() returns trigger
 language plpgsql set search_path = public as $fn$
 declare
   e text := coalesce(auth.jwt() ->> 'email', '');
-  giu text[] := array['ket_qua', 'ghi_chu_ket_qua', 'bc', 'sua_luc', 'nguoi_sua'];
+  giu text[] := array['ket_qua', 'ghi_chu_ket_qua', 'bc', 'sua_luc', 'nguoi_sua', 'xong_luc'];
 begin
   if tg_op = 'INSERT' then
     new.nguoi_tao := e; new.nguoi_sua := e;
+    if new.ket_qua = 'xong' and new.xong_luc is null then new.xong_luc := now(); end if;
   else
     if private.vai_tro() = 'can_bo' and (to_jsonb(new) - giu) is distinct from (to_jsonb(old) - giu) then
       raise exception 'Cán bộ chỉ được cập nhật kết quả và đính kèm cho việc được giao';
     end if;
     new.tao_luc := old.tao_luc; new.nguoi_tao := old.nguoi_tao;
     new.nguoi_sua := e; new.sua_luc := now();
+    if new.ket_qua = 'xong' then
+      if old.ket_qua is distinct from 'xong' then new.xong_luc := now(); else new.xong_luc := old.xong_luc; end if;
+    else
+      new.xong_luc := null;
+    end if;
   end if;
   return new;
 end
