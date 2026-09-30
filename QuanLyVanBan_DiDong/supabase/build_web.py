@@ -16,6 +16,7 @@ cfg = os.path.join(out, 'config.js')
 if not os.path.exists(cfg):  # không ghi đè cấu hình đã điền
     shutil.copy(os.path.join(here, 'config.js'), cfg)
 open(os.path.join(out, '.nojekyll'), 'w').close()
+shutil.copy(os.path.join(here, 'assets', 'sw.js'), os.path.join(out, 'sw.js'))
 for n in ('icon-192.png', 'icon-512.png', 'apple-touch-icon.png'):
     shutil.copy(os.path.join(here, 'assets', n), os.path.join(out, n))
 open(os.path.join(out, 'manifest.webmanifest'), 'w', encoding='utf-8').write('''{

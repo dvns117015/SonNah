@@ -39,6 +39,19 @@ PHẦN B. ĐƯA TRANG WEB LÊN GITHUB PAGES (khoảng 5 phút)
 3. Chờ 1 đến 2 phút, địa chỉ hiện ở đầu trang Pages, dạng https://<tên-github>.github.io/SonNah/
 4. Gửi link cho cán bộ. Mở link > đăng nhập > menu trình duyệt > "Thêm vào màn hình chính".
 
+THÔNG BÁO ĐẨY NHẮC VIỆC
+-----------------------
+  - Mỗi sáng 7h30 (giờ Việt Nam) Supabase tự gửi thông báo tới điện thoại đã bật: số việc quá hạn và sắp đến
+    hạn trong 3 ngày, kèm việc gần hạn nhất. Không cần mở ứng dụng. Cán bộ chỉ nhận việc của mình; ngày không
+    có việc thì không gửi gì.
+  - Cách bật (mỗi điện thoại làm một lần): Cài đặt > Thông báo đẩy > "Bật thông báo nhắc việc trên máy này" > Cho phép.
+    Bấm "Gửi thông báo thử" để kiểm tra ngay.
+  - iPhone: thông báo chỉ chạy khi ứng dụng đã được thêm vào Màn hình chính. Mở link bằng Safari, bấm nút Chia sẻ,
+    chọn "Thêm vào Màn hình chính", rồi mở ứng dụng từ biểu tượng mới tạo và bật thông báo ở đó. Cần iOS 16.4 trở lên.
+  - Android: dùng Chrome, có thể bật ngay trong trình duyệt hoặc sau khi thêm vào màn hình chính.
+  - Tài khoản bị gỡ khỏi bảng nhanvien tự bị xóa đăng ký thông báo ở lần gửi kế tiếp.
+  - Cài lại từ đầu trên dự án Supabase khác: xem thong_bao_day.sql và functions/gui-nhac-viec.
+
 VAI TRÒ TRONG ỨNG DỤNG
 ----------------------
   - Quyền được kiểm tra ngay trong cơ sở dữ liệu, không chỉ ẩn nút trên màn hình, nên không lách được.
