@@ -8,7 +8,7 @@ os.makedirs(out, exist_ok=True)
 s = open(os.path.join(here, '..', 'index.html'), encoding='utf-8').read()
 b = open(os.path.join(here, 'supabase-backend.js'), encoding='utf-8').read()
 s = s.replace('<base target="_top">\n', '')
-s = s.replace('<meta name="viewport"', '<meta name="theme-color" content="#2a55e6">\n<meta name="viewport"', 1)
+s = s.replace('<meta name="viewport"', '<meta name="theme-color" content="#2a55e6">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-title" content="Văn bản">\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="icon" href="icon-192.png">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n<meta name="viewport"', 1)
 lib = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'
 s = s.replace('<script>\n(function () {', '<script src="config.js"></script>\n<script src="' + lib + '"></script>\n<script>' + b + '</script>\n<script>\n(function () {', 1)
 open(os.path.join(out, 'index.html'), 'w', encoding='utf-8').write(s)
@@ -16,4 +16,21 @@ cfg = os.path.join(out, 'config.js')
 if not os.path.exists(cfg):  # không ghi đè cấu hình đã điền
     shutil.copy(os.path.join(here, 'config.js'), cfg)
 open(os.path.join(out, '.nojekyll'), 'w').close()
+for n in ('icon-192.png', 'icon-512.png', 'apple-touch-icon.png'):
+    shutil.copy(os.path.join(here, 'assets', n), os.path.join(out, n))
+open(os.path.join(out, 'manifest.webmanifest'), 'w', encoding='utf-8').write('''{
+  "name": "Quản lý văn bản",
+  "short_name": "Văn bản",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f5fc",
+  "theme_color": "#2a55e6",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+''')
 print('Đã tạo', out)

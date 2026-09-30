@@ -92,7 +92,7 @@ textarea.field{resize:vertical;min-height:72px}
 .tab[aria-pressed="true"]{background:var(--tc);color:#fff}
 .tab[aria-pressed="true"]::before{background:#fff}
 .tab[aria-pressed="true"] b{color:#fff}
-.t-open{--tc:#e08a00}.t-late{--tc:#e0334f}.t-dinhky{--tc:#7c5cff}.t-done{--tc:#0f9e6e}
+.t-mine{--tc:#0f9e6e}.t-open{--tc:#e08a00}.t-late{--tc:#e0334f}.t-dinhky{--tc:#7c5cff}.t-done{--tc:#0f9e6e}
 
 /* ---- nhắc việc ---- */
 .remind{margin-top:12px;border-radius:16px;padding:11px 13px;background:var(--amber-soft);color:var(--amber)}
@@ -414,20 +414,27 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       <div class="tip" id="stMail"></div>
       <button class="btn block" id="stTest">Gửi thử email nhắc việc</button>
     </div>
-    <div class="group g-cb">
+    <div class="group g-cb" id="grpCb">
       <h4>Danh sách cán bộ</h4>
       <div class="chips" id="stCb"></div>
       <div class="addrow"><input class="field" id="stCbNew" placeholder="Tên cán bộ" autocomplete="off"><button class="btn" id="stCbAdd">Thêm</button></div>
       <div class="tip">Tên trong danh sách hiện thành thẻ để chọn nhanh khi thêm văn bản. Xóa tên ở đây không ảnh hưởng văn bản đã nhập.</div>
     </div>
-    <div class="group g-set">
+    <div class="group g-set" id="grpLoai">
       <h4>Phân loại công việc</h4>
       <div id="stLoai"></div>
       <div class="tip">Đặt lịch cho báo cáo định kỳ: hàng tuần vào thứ mấy, hàng tháng vào ngày nào, hàng quý, 6 tháng, hàng năm. Có thể bật tự tạo công việc trước hạn.</div>
       <button class="btn block" id="lnAdd">Thêm loại mới</button>
     </div>
     <div class="group g-set">
-      <h4>Dữ liệu</h4>
+      <h4>Dữ liệu và tài khoản</h4>
+      <div class="tip" id="stMe"></div>
+      <button class="btn block" id="stTrash" hidden>Thùng rác</button>
+      <button class="btn block" id="stBackup" hidden>Sao lưu dữ liệu (không kèm ảnh)</button>
+      <button class="btn block" id="stBackupFull" hidden>Sao lưu kèm ảnh và file</button>
+      <label class="btn block" id="stRestoreLb" for="stRestore" hidden>Khôi phục từ file sao lưu</label>
+      <input type="file" id="stRestore" accept="application/json,.json" hidden>
+      <div class="tip" id="stBackupTip" hidden>Sao lưu tải về điện thoại một file .json. Nên sao lưu định kỳ; bản kèm ảnh có thể rất nặng nếu nhiều văn bản.</div>
       <a class="btn block" id="stSheet" href="#" target="_blank" rel="noopener">Mở Google Sheet (xuất Excel, in)</a>
       <button class="btn block" id="stCsv" hidden>Tải danh sách Excel (CSV)</button>
       <button class="btn block" id="stLogout">Đăng xuất</button>
@@ -460,6 +467,18 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   <div class="s-foot"><div class="wrap"><button class="btn primary block" id="lSave">Lưu loại</button></div></div>
 </section>
 
+<!-- Thùng rác -->
+<section class="screen" id="scrTrash" hidden>
+  <div class="s-head"><div class="wrap"><div class="bar-row">
+    <button class="ib" data-close="scrTrash" aria-label="Quay lại"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <h2>Thùng rác</h2>
+  </div></div></div>
+  <div class="wrap"><div class="s-body">
+    <div class="tip">Văn bản đã xóa nằm ở đây. Khôi phục để đưa lại danh sách, hoặc xóa hẳn (mất cả ảnh và file).</div>
+    <div id="trList" style="display:grid;gap:10px"></div>
+  </div></div>
+</section>
+
 <datalist id="dlCb"></datalist>
 <div class="viewer" id="viewer" hidden>
   <div class="vt"><span id="vCount"></span><button id="vClose">Đóng</button></div>
@@ -479,6 +498,19 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   var DEFAULT_LOAI = [{ id: 'vb', name: 'Văn bản thường', ky: '' }, { id: 'bctuan', name: 'Báo cáo tuần', ky: 'tuan', ngay: 5 }, { id: 'bcthang', name: 'Báo cáo tháng', ky: 'thang', ngay: 0 }, { id: 'bcquy', name: 'Báo cáo quý', ky: 'quy', thang: 3, ngay: 0 }, { id: 'bc6thang', name: 'Báo cáo 6 tháng', ky: '6thang', thang: 6, ngay: 0 }, { id: 'bcnam', name: 'Báo cáo năm', ky: 'nam', thang: 12, ngay: 0 }];
     var loai = DEFAULT_LOAI.slice();
   var canbo = [];
+  var me = { role: '', ten: '', account: '' };
+  function canEdit() { return !me.role || me.role === 'quan_tri' || me.role === 'van_thu'; }
+  function isMine(d) { return !!me.ten && d.can_bo.toLowerCase().indexOf(me.ten.toLowerCase()) >= 0; }
+  function canUpdate(d) { return canEdit() || (me.role === 'can_bo' && isMine(d)); }
+  var ROLE_TEXT = { quan_tri: 'Quản trị', van_thu: 'Văn thư', lanh_dao: 'Lãnh đạo (chỉ xem)', can_bo: 'Cán bộ' };
+  function applyRole() {
+    $('fab').hidden = !canEdit() || selectMode;
+    $('grpCb').hidden = !canEdit(); $('grpLoai').hidden = !canEdit();
+    $('stTrash').hidden = !(canEdit() && window.FEATURES && window.FEATURES.trash);
+    var bk = canEdit() && window.FEATURES && window.FEATURES.backup;
+    $('stBackup').hidden = $('stBackupFull').hidden = $('stRestoreLb').hidden = $('stBackupTip').hidden = !bk;
+    $('stMe').textContent = me.account ? 'Tài khoản: ' + me.account + (me.role ? ' (' + (ROLE_TEXT[me.role] || me.role) + (me.ten ? ', ' + me.ten : '') + ')' : '') : '';
+  }
   var CAT_BUILTIN = { vb: 7, bctuan: 0, bcthang: 1, bcquy: 2, bc6thang: 3, bcnam: 4 };
   function hashN(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; }
   function catIdx(id) { id = id || 'vb'; return CAT_BUILTIN[id] !== undefined ? CAT_BUILTIN[id] : [5, 6, 0, 1, 2, 3, 4][hashN(id) % 7]; }
@@ -582,15 +614,19 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
 
   // ---- Danh sách ----
   function load() {
-    return Promise.all([rpc('getAll'), rpc('getLoai').catch(function () { return null; }), rpc('getCanBo').catch(function () { return null; })]).then(function (r) {
+    return Promise.all([rpc('getAll'), rpc('getLoai').catch(function () { return null; }), rpc('getCanBo').catch(function () { return null; }), rpc('getInfo').catch(function () { return {}; })]).then(function (r) {
+      var inf = r[3] || {}, first = !me.loaded;
+      me.role = inf.role || ''; me.ten = inf.ten || ''; me.account = inf.account || ''; me.loaded = true;
+      if (first && me.role === 'can_bo' && me.ten) F.tab = 'mine';
       docs = JSON.parse(JSON.stringify(r[0])); docs.forEach(function (d) { if (!d.loai) d.loai = 'vb'; if (!d.bc) d.bc = []; });
       canbo = (r[2] && r[2].length) ? r[2] : namesFromDocs();
-      loai = (r[1] && r[1].length) ? r[1] : DEFAULT_LOAI.slice(); renderAll(); ensureAuto();
+      loai = (r[1] && r[1].length) ? r[1] : DEFAULT_LOAI.slice(); applyRole(); renderAll(); if (canEdit()) ensureAuto();
       if (!$('scrDetail').hidden && byId(curId)) { var y = $('scrDetail').scrollTop; openDetail(curId); $('scrDetail').scrollTop = y; }
     }).catch(function (e) { $('list').innerHTML = '<div class="empty">Không tải được dữ liệu.<br>' + esc(e.message) + '</div>'; });
   }
   function matches(d) {
     var t = todayStr();
+    if (F.tab === 'mine' && !isMine(d)) return false;
     if (F.tab === 'open' && !isOpen(d)) return false;
     if (F.tab === 'late' && !(isOpen(d) && d.han && d.han < t)) return false;
     if (F.tab === 'done' && d.ket_qua !== 'xong') return false;
@@ -633,8 +669,8 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   function lateCount() { var t = todayStr(); return docs.filter(function (d) { return isOpen(d) && d.han && d.han < t; }).length; }
   function renderTabs() {
     var t = todayStr();
-    var n = { all: docs.length, open: docs.filter(isOpen).length, late: lateCount(), done: docs.filter(function (d) { return d.ket_qua === 'xong'; }).length, dinhky: docs.filter(function (d) { return loaiOf(d.loai).ky; }).length };
-    var defs = [['all', 'Tất cả'], ['open', 'Chưa xong'], ['late', 'Quá hạn'], ['dinhky', 'Định kỳ'], ['done', 'Đã xong']];
+    var n = { all: docs.length, open: docs.filter(isOpen).length, late: lateCount(), done: docs.filter(function (d) { return d.ket_qua === 'xong'; }).length, dinhky: docs.filter(function (d) { return loaiOf(d.loai).ky; }).length, mine: docs.filter(isMine).length };
+    var defs = (me.ten ? [['mine', 'Của tôi']] : []).concat([['all', 'Tất cả'], ['open', 'Chưa xong'], ['late', 'Quá hạn'], ['dinhky', 'Định kỳ'], ['done', 'Đã xong']]);
     $('tabs').innerHTML = defs.map(function (x) {
       return '<button class="tab t-' + x[0] + '" data-tab="' + x[0] + '" aria-pressed="' + (F.tab === x[0]) + '">' + x[1] + '<b>' + n[x[0]] + '</b></button>';
     }).join('');
@@ -807,6 +843,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   // Tự tạo công việc cho các hạn sắp tới (mã cố định nên nhiều máy mở cùng lúc cũng không bị trùng)
   var autoTried = {};
   function ensureAuto() {
+    if (!canEdit()) return;
     var today = todayStr(), jobs = [];
     loai.forEach(function (c) {
       if (!c.ky || !sched(c).auto) return;
@@ -829,7 +866,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   var remOpen = false;
   function renderRemind() {
     var days = remDays(), t = todayStr();
-    var l = docs.filter(function (d) { return isOpen(d) && d.han && daysLeft(d.han) <= days; }).sort(function (a, b) { return a.han < b.han ? -1 : 1; });
+    var l = docs.filter(function (d) { return isOpen(d) && d.han && daysLeft(d.han) <= days && (me.role !== 'can_bo' || isMine(d)); }).sort(function (a, b) { return a.han < b.han ? -1 : 1; });
     var box = $('remind');
     if (!l.length) { box.hidden = true; return; }
     var late = l.filter(function (d) { return d.han < t; }).length;
@@ -916,7 +953,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   function saveForm() {
     var d = { id: form.id };
     FIELDS.forEach(function (f) { d[f] = f === 'ket_qua' ? form.kq : $(f).value; });
-    if (!d.trich_yeu.trim() && !d.so_van_ban.trim()) { toast('Nhập số văn bản hoặc trích yếu'); return; }
+    if (!d.trich_yeu.trim()) { toast('Nhập trích yếu của văn bản'); return; }
     var btn = $('fSave'); btn.disabled = true; btn.textContent = 'Đang lưu...';
     var failed = 0, total = form.pending.length, done = 0;
     rpc('saveDoc', [d]).then(function (r) {
@@ -954,13 +991,18 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
         return isImg(a) ? '<div class="th" style="aspect-ratio:auto;height:180px" data-pview="' + esc(a.id) + '" data-fid="' + esc(a.id) + '"><div class="ld">Đang tải</div></div>'
           : '<div class="frow" data-pfile="' + esc(a.id) + '"><div class="fi">PDF</div><span>' + esc(a.name) + '<small>Chạm để mở hoặc lưu</small></span></div>';
       }).join('') + '</div>' : '<div class="tip">Chưa có ảnh hay file kết quả.</div>') +
-      '<button class="btn block" id="dAddProof">Thêm ảnh / file kết quả</button></div>' +
-      '<button class="btn danger block" id="dDel">Xóa văn bản</button>';
+      (canUpdate(d) ? '<button class="btn block" id="dAddProof">Thêm ảnh / file kết quả</button>' : '') + '</div>' +
+      (d.nguoi_tao || d.nguoi_sua ? '<div class="group"><h4>Lịch sử</h4><div class="tip">' + (d.nguoi_tao ? 'Tạo bởi ' + esc(d.nguoi_tao) + ' lúc ' + fmtTime(d.tao_luc) + '<br>' : '') + (d.nguoi_sua ? 'Sửa gần nhất bởi ' + esc(d.nguoi_sua) + ' lúc ' + fmtTime(d.sua_luc) : '') + '</div></div>' : '') +
+      (!canUpdate(d) ? '<div class="tip">' + (me.role === 'lanh_dao' ? 'Bạn chỉ có quyền xem.' : 'Việc này không giao cho bạn nên bạn chỉ xem được.') + '</div>' : '') +
+      (canEdit() ? '<button class="btn danger block" id="dDel">' + (window.FEATURES && window.FEATURES.trash ? 'Chuyển vào thùng rác' : 'Xóa văn bản') + '</button>' : '');
+    $('dEdit').hidden = !canEdit();
+    [].forEach.call($('dBody').querySelectorAll('[data-setkq]'), function (b) { b.disabled = !canUpdate(d); b.style.opacity = canUpdate(d) ? '' : '.55'; });
     show('scrDetail');
     if (d.anh.length) fillThumbs($('dThumbs'), d.anh.map(function (a) { return a.id; }));
     var pimg = d.bc.filter(isImg).map(function (a) { return a.id; });
     if (pimg.length) fillThumbs($('dProof'), pimg);
   }
+  function fmtTime(t) { var d = new Date(t); if (isNaN(d)) return ''; return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear() + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
   function isImg(a) { return !a.type || a.type.indexOf('image/') === 0; }
 
   // ---- Hoàn thành: bắt buộc có ảnh hoặc file kết quả ----
@@ -1023,6 +1065,15 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       else toast(failed ? failed + ' file chưa lưu được' : 'Đã lưu kết quả');
     }).catch(function (e) { btn.disabled = false; btn.textContent = done.mode === 'done' ? 'Hoàn thành' : 'Lưu ảnh / file'; toast(e.message); });
   }
+  function openTrash() {
+    show('scrTrash');
+    return rpc('getTrash').then(function (l) {
+      $('trList').innerHTML = l.length ? l.map(function (d) {
+        return '<div class="group"><div><b>' + esc(d.so_van_ban || 'Chưa có số') + '</b> ' + esc(d.trich_yeu || '') + '<div class="tip">Xóa lúc ' + fmtTime(d.da_xoa) + (d.nguoi_sua ? ' bởi ' + esc(d.nguoi_sua) : '') + '</div></div>' +
+          '<div class="addrow"><button class="btn" data-restore="' + esc(d.id) + '" style="flex:1">Khôi phục</button><button class="btn danger" data-purge="' + esc(d.id) + '">Xóa hẳn</button></div></div>';
+      }).join('') : '<div class="empty">Thùng rác trống.</div>';
+    }).catch(function (e) { $('trList').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; });
+  }
   function openProofFile(fid, name) {
     toast('Đang tải file...');
     rpc('getPhoto', [fid]).then(function (u) {
@@ -1060,7 +1111,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
     $('sgInfo').textContent = signFor.length + ' văn bản. Trên điện thoại, vuốt ngang để xem hết các cột.';
   }
   function startSelect() { selectMode = true; selected = {}; $('selbar').hidden = false; $('fab').hidden = true; updSel(); renderList(); toast('Chạm vào văn bản để chọn'); }
-  function endSelect() { selectMode = false; selected = {}; $('selbar').hidden = true; $('fab').hidden = false; renderList(); }
+  function endSelect() { selectMode = false; selected = {}; $('selbar').hidden = true; $('fab').hidden = !canEdit(); renderList(); }
   function updSel() { var n = Object.keys(selected).length; $('selCount').textContent = n ? 'Đã chọn ' + n : 'Chưa chọn (in tất cả)'; }
 
   // ---- Sự kiện ----
@@ -1069,7 +1120,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       var c = e.target.closest ? e.target.closest('[data-close]') : null;
       if (c) hide(c.getAttribute('data-close'));
     });
-    $('fab').onclick = function () { openForm(null); };
+    $('fab').onclick = function () { if (canEdit()) openForm(null); };
     $('camera').onchange = function () { addFiles(this.files); this.value = ''; };
     $('gallery').onchange = function () { addFiles(this.files); this.value = ''; };
     $('fSave').onclick = saveForm;
@@ -1135,7 +1186,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       if (e.target.closest('#remHead')) { remOpen = !remOpen; renderRemind(); return; }
       var li = e.target.closest('li'); if (li) openDetail(li.getAttribute('data-id'));
     };
-    $('dEdit').onclick = function () { var d = byId(curId); if (d) openForm(d); };
+    $('dEdit').onclick = function () { var d = byId(curId); if (d && canEdit()) openForm(d); };
     $('dBody').onclick = function (e) {
       var k = e.target.getAttribute('data-setkq'), v = e.target.closest('[data-view]');
       var pv = e.target.closest('[data-pview]'), pf = e.target.closest('[data-pfile]');
@@ -1146,9 +1197,10 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
         var fa = byId(curId).bc.filter(function (a) { return a.id === pf.getAttribute('data-pfile'); })[0];
         openProofFile(fa.id, fa.name);
       } else if (e.target.id === 'dAddProof') {
-        openDone(curId, 'attach');
+        if (canUpdate(byId(curId))) openDone(curId, 'attach');
       } else if (k) {
         var d = byId(curId); if (!d || d.ket_qua === k) return;
+        if (!canUpdate(d)) { toast('Bạn không có quyền đổi kết quả việc này'); return; }
         if (k === 'xong' && !d.bc.length) { openDone(curId, 'done'); return; }
         var old = d.ket_qua; d.ket_qua = k; openDetail(curId); renderAll();
         rpc('setStatus', [curId, k]).then(function () { if (k === 'xong') { confetti(); toast('Hoàn thành! Làm tốt lắm'); offerNext(d); ensureAuto(); } }).catch(function (err) { d.ket_qua = old; openDetail(curId); renderAll(); toast(err.message); });
@@ -1156,10 +1208,11 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
         var ids = [].map.call($('dThumbs').querySelectorAll('.th'), function (t) { return t.getAttribute('data-fid'); });
         openViewer(ids, ids.indexOf(v.getAttribute('data-fid')));
       } else if (e.target.id === 'dDel') {
-        var dd = byId(curId);
-        ask('Xóa văn bản "' + (dd.so_van_ban || dd.trich_yeu) + '" và toàn bộ ảnh?', 'Xóa', true).then(function (ok) {
+        var dd = byId(curId), trash = window.FEATURES && window.FEATURES.trash;
+        if (!canEdit()) return;
+        ask((trash ? 'Chuyển văn bản "' : 'Xóa văn bản "') + (dd.so_van_ban || dd.trich_yeu) + (trash ? '" vào thùng rác?' : '" và toàn bộ ảnh?'), trash ? 'Chuyển' : 'Xóa', true).then(function (ok) {
           if (!ok) return;
-          rpc('deleteDoc', [curId]).then(function () { hide('scrDetail'); return load(); }).then(function () { toast('Đã xóa'); }).catch(function (err) { toast(err.message); });
+          rpc('deleteDoc', [curId]).then(function () { hide('scrDetail'); return load(); }).then(function () { toast(trash ? 'Đã chuyển vào thùng rác' : 'Đã xóa'); }).catch(function (err) { toast(err.message); });
         });
       }
     };
@@ -1200,6 +1253,37 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
     };
     $('stDays').onchange = function () { store('remDays', String(parseInt(this.value, 10) || 0)); renderAll(); };
     $('stTest').onclick = function () { rpc('guiThuNhacViec').then(function (m) { toast(m); }).catch(function (e) { toast(e.message); }); };
+    $('stTrash').onclick = function () { openTrash(); };
+    var doBackup = function (full) {
+      toast(full ? 'Đang gom cả ảnh và file, có thể mất vài phút...' : 'Đang sao lưu...');
+      rpc('exportAll', [full]).then(function (o) {
+        var t = new Date(), name = 'sao-luu-van-ban-' + t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2) + (full ? '-kem-anh' : '') + '.json';
+        return window.SAVE_FILE(name, JSON.stringify(o)).then(function () { toast('Đã sao lưu ' + o.vanban.length + ' văn bản'); });
+      }).catch(function (e) { if (e && e.code !== 'declined') toast((e && e.message) || 'Không sao lưu được'); });
+    };
+    $('stBackup').onclick = function () { doBackup(false); };
+    $('stBackupFull').onclick = function () { doBackup(true); };
+    $('stRestore').onchange = function () {
+      var f = this.files[0]; this.value = ''; if (!f) return;
+      var r = new FileReader();
+      r.onload = function () {
+        var o; try { o = JSON.parse(r.result); } catch (e) { toast('File không đọc được'); return; }
+        if (!o || o.app !== 'quan-ly-van-ban' || !o.vanban) { toast('Không phải file sao lưu của ứng dụng này'); return; }
+        ask('Khôi phục ' + o.vanban.length + ' văn bản từ file sao lưu? Văn bản cùng mã sẽ bị ghi đè bằng bản trong file.', 'Khôi phục').then(function (ok) {
+          if (!ok) return;
+          toast('Đang khôi phục...');
+          rpc('importAll', [o]).then(function (n) { toast('Đã khôi phục ' + n.vanban + ' văn bản' + (n.files ? ', ' + n.files + ' file' : '')); return load(); }).catch(function (e) { toast(e.message); });
+        });
+      };
+      r.readAsText(f);
+    };
+    $('trList').onclick = function (e) {
+      var r = e.target.getAttribute('data-restore'), x = e.target.getAttribute('data-purge');
+      if (r) rpc('restoreDoc', [r]).then(function () { toast('Đã khôi phục'); return openTrash(); }).then(load).catch(function (err) { toast(err.message); });
+      else if (x) ask('Xóa hẳn văn bản này cùng ảnh và file? Không khôi phục được.', 'Xóa hẳn', true).then(function (ok) {
+        if (ok) rpc('purgeDoc', [x]).then(function () { toast('Đã xóa hẳn'); return openTrash(); }).catch(function (err) { toast(err.message); });
+      });
+    };
     $('stCsv').onclick = function () {
       var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
       var rows = [['STT', 'Số văn bản', 'Phân loại', 'Ngày văn bản', 'Ngày nhận', 'Trích yếu', 'Nội dung công việc', 'Ý kiến chỉ đạo', 'Cán bộ thực hiện', 'Hạn', 'Kết quả', 'Ghi chú kết quả', 'Ký nhận']];

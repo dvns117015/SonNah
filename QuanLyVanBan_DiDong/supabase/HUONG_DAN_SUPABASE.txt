@@ -12,11 +12,18 @@ PHẦN A. TẠO KHO DỮ LIỆU TRÊN SUPABASE (khoảng 10 phút)
    Mở file supabase.sql (trong thư mục QuanLyVanBan_DiDong/supabase của repo trên GitHub),
    bấm "Raw", chọn hết, copy, dán vào SQL Editor, bấm Run. Thấy "Success" là xong.
    (Chạy lại nhiều lần cũng không sao.)
-3. Thêm người được dùng. Chỉ email nằm trong bảng nhanvien mới xem và sửa được dữ liệu.
+3. Thêm người được dùng và cho họ một vai trò. Chỉ email nằm trong bảng nhanvien mới xem được dữ liệu.
    a) Authentication > Users > Add user > Create new user: nhập email, mật khẩu, TÍCH "Auto Confirm User".
-   b) SQL Editor > New query, chạy (thay email cho đúng):
-        insert into public.nhanvien (email) values ('email-cua-can-bo@gmail.com');
-   Mỗi người một tài khoản hoặc dùng chung một tài khoản. Muốn thu hồi quyền: xóa email khỏi bảng nhanvien.
+   b) SQL Editor > New query, chạy (đổi email, tên, vai trò cho đúng):
+        insert into public.nhanvien (email, ten, vai_tro) values ('email-cua-can-bo@gmail.com', 'Nguyễn Văn An', 'can_bo');
+   Bốn vai trò:
+      quan_tri  : làm được mọi việc.
+      van_thu   : thêm, sửa, xóa tất cả văn bản, loại công việc, danh sách cán bộ.
+      lanh_dao  : chỉ xem, không sửa được gì.
+      can_bo    : xem tất cả, chỉ cập nhật kết quả và đính kèm ảnh, file cho việc được giao cho mình.
+   Với can_bo, cột "ten" phải giống hệt tên thẻ cán bộ dùng khi giao việc (vd 'Nguyễn Văn An').
+   Đổi vai trò:  update public.nhanvien set vai_tro = 'van_thu' where email = 'a@gmail.com';
+   Thu hồi quyền: delete from public.nhanvien where email = 'a@gmail.com';
 4. (Không bắt buộc) Authentication > Sign In / Providers > Email: tắt "Allow new users to sign up".
    Dù bật hay tắt, người tự đăng ký vẫn không xem được dữ liệu vì email của họ không nằm trong bảng nhanvien.
 5. Project Settings > API: copy "Project URL" và "anon public" key.
@@ -32,6 +39,18 @@ PHẦN B. ĐƯA TRANG WEB LÊN GITHUB PAGES (khoảng 5 phút)
 3. Chờ 1 đến 2 phút, địa chỉ hiện ở đầu trang Pages, dạng https://<tên-github>.github.io/SonNah/
 4. Gửi link cho cán bộ. Mở link > đăng nhập > menu trình duyệt > "Thêm vào màn hình chính".
 
+VAI TRÒ TRONG ỨNG DỤNG
+----------------------
+  - Quyền được kiểm tra ngay trong cơ sở dữ liệu, không chỉ ẩn nút trên màn hình, nên không lách được.
+  - Cán bộ: mở ứng dụng vào thẳng thẻ "Của tôi", nhắc việc chỉ hiện việc của mình. Việc của người khác
+    vẫn xem được nhưng nút kết quả bị khóa.
+  - Lãnh đạo: xem tất cả, không có nút thêm, sửa, xóa.
+  - Mỗi văn bản ghi lại ai tạo, ai sửa gần nhất và lúc nào (mục "Lịch sử" trong chi tiết).
+  - Xóa văn bản chỉ chuyển vào Thùng rác (Cài đặt > Thùng rác): khôi phục hoặc xóa hẳn.
+  - Sao lưu: Cài đặt > Sao lưu dữ liệu tải về một file .json; "Khôi phục từ file sao lưu" đưa dữ liệu trở lại.
+    Nên sao lưu định kỳ (gói miễn phí của Supabase không tự sao lưu).
+  - Khi thêm văn bản phải có trích yếu.
+
 SỬ DỤNG
 -------
 Giống bản đang dùng: chụp ảnh văn bản, hạn, nhắc việc, loại công việc và báo cáo định kỳ,
@@ -43,4 +62,6 @@ GHI CHÚ
 - Đổi mật khẩu, thêm hoặc xóa tài khoản: Supabase > Authentication > Users.
 - Xem hoặc sao lưu dữ liệu: Supabase > Table Editor (bảng vanban, cauhinh). Ảnh nằm ở Storage > tep.
 - Sau khi tôi sửa mã, chạy lại build_web.py (hoặc nhờ tôi) để cập nhật thư mục docs.
-- Hiện tại dùng gói miễn phí thì dự án bị tạm dừng nếu không ai dùng trong vài tuần; vào Supabase bấm khôi phục.
+- Gói miễn phí của Supabase tạm dừng dự án nếu lâu không có ai dùng. Repo có sẵn lịch tự gọi mỗi ngày
+  (.github/workflows/keepalive.yml) để tránh việc này; nếu sau này thấy dự án bị dừng, vào Supabase bấm khôi phục.
+  GitHub có thể tự tắt lịch này nếu repo không có hoạt động nào suốt 60 ngày; vào tab Actions bật lại.
