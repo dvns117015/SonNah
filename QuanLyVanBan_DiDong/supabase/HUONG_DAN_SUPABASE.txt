@@ -39,6 +39,27 @@ PHẦN B. ĐƯA TRANG WEB LÊN GITHUB PAGES (khoảng 5 phút)
 3. Chờ 1 đến 2 phút, địa chỉ hiện ở đầu trang Pages, dạng https://<tên-github>.github.io/SonNah/
 4. Gửi link cho cán bộ. Mở link > đăng nhập > menu trình duyệt > "Thêm vào màn hình chính".
 
+ĐĂNG NHẬP BẰNG TÊN NGẮN
+-----------------------
+  - Ở màn hình đăng nhập có thể gõ tên ngắn thay cho email, ví dụ "Son". Ứng dụng tự hiểu là son@vanban.local.
+    Vì vậy khi tạo tài khoản cho cán bộ, đặt email dạng ten@vanban.local (không cần là hộp thư thật).
+  - Tài khoản dạng này không nhận được thư đặt lại mật khẩu; muốn đổi mật khẩu, nhờ người quản trị đặt lại ở
+    Supabase > Authentication > Users.
+
+BẢNG TỔNG QUAN CHO LÃNH ĐẠO
+---------------------------
+  - Lãnh đạo mở ứng dụng vào thẳng "Tổng quan" (quản trị và văn thư chuyển qua lại bằng nút Tổng quan / Danh sách;
+    cán bộ không có màn hình này).
+  - Bộ lọc kỳ: Tất cả, Tuần này, Tháng này, Quý này (kỳ gồm việc có hạn trong kỳ và việc quá hạn chưa xong từ trước).
+  - Tiến độ hoàn thành (phần trăm và thanh màu xanh, cam, xám), Quá hạn chưa xong, Sắp đến hạn 3 ngày, Đang làm, Chưa làm.
+    Chạm vào ô để xem danh sách việc tương ứng.
+  - Tiến độ theo từng cán bộ: mỗi người một thẻ, hiện tổng việc, phần trăm đã xong, thanh tiến độ, số việc quá hạn
+    (nhãn đỏ). Xếp người trễ nhiều nhất lên đầu, hoặc xếp theo tên. Chạm vào thẻ để xem việc của người đó.
+  - Việc quá hạn chưa xong: liệt kê từ trễ nhiều ngày nhất, ghi rõ của ai, hạn nào, trễ bao nhiêu ngày.
+  - Sắp đến hạn trong 3 ngày, và Hoàn thành trễ hạn (việc đã xong nhưng xong sau hạn).
+  - Việc giao cho nhiều người được tính cho từng người; việc chưa giao ai nằm ở nhóm "(Chưa giao)".
+  - Việc "Không thực hiện" không được tính vào tiến độ.
+
 THÔNG BÁO ĐẨY NHẮC VIỆC
 -----------------------
   - Mỗi sáng 7h30 (giờ Việt Nam) Supabase tự gửi thông báo tới điện thoại đã bật: số việc quá hạn và sắp đến

@@ -1,7 +1,7 @@
 /* Kho dữ liệu cho bản chạy trên web riêng (GitHub Pages) dùng Supabase:
    dữ liệu trong bảng vanban/cauhinh, ảnh và PDF trong kho "tep", đăng nhập bằng email + mật khẩu do quản trị tạo. */
 (function () {
-  var T = 'vanban', C = 'cauhinh', BUCKET = 'tep';
+  var T = 'vanban', C = 'cauhinh', BUCKET = 'tep', LOGIN_DOMAIN = 'vanban.local';
   var sb = null, initP = null, rtTimer = null;
   window.PROOF_MAX_BYTES = 10 * 1024 * 1024;
   window.FEATURES = { trash: true, audit: true, backup: true, push: true };
@@ -33,16 +33,18 @@
   }
   function loginUI(msg) {
     return new Promise(function (resolve) {
-      var m = overlay('<p><b>Đăng nhập</b></p><p class="tip">Dùng email và mật khẩu do người quản trị cấp.</p>' +
-        '<input class="field" id="lgEmail" type="email" placeholder="Email" autocapitalize="off" autocomplete="username">' +
+      var m = overlay('<p><b>Đăng nhập</b></p><p class="tip">Dùng tên đăng nhập (hoặc email) và mật khẩu do người quản trị cấp.</p>' +
+        '<input class="field" id="lgEmail" type="text" placeholder="Tên đăng nhập hoặc email" autocapitalize="off" autocorrect="off" autocomplete="username">' +
         '<input class="field" id="lgPass" type="password" placeholder="Mật khẩu" autocomplete="current-password">' +
         '<p class="tip" id="lgErr" style="color:var(--red)" ' + (msg ? '' : 'hidden') + '>' + esc(msg || '') + '</p>' +
         '<div class="acts"><button class="btn primary" id="lgGo">Vào</button></div>');
       var go = function () {
         var b = m.querySelector('#lgGo'), err = m.querySelector('#lgErr');
         b.disabled = true; b.textContent = 'Đang vào...';
-        sb.auth.signInWithPassword({ email: m.querySelector('#lgEmail').value.trim(), password: m.querySelector('#lgPass').value }).then(function (r) {
-          if (r.error) { err.hidden = false; err.textContent = /invalid/i.test(r.error.message) ? 'Sai email hoặc mật khẩu.' : r.error.message; b.disabled = false; b.textContent = 'Vào'; return; }
+        var user = m.querySelector('#lgEmail').value.trim();
+        if (user.indexOf('@') < 0) user = user.toLowerCase() + '@' + LOGIN_DOMAIN;   // gõ "son" thì đăng nhập bằng son@vanban.local
+        sb.auth.signInWithPassword({ email: user, password: m.querySelector('#lgPass').value }).then(function (r) {
+          if (r.error) { err.hidden = false; err.textContent = /invalid/i.test(r.error.message) ? 'Sai tên đăng nhập hoặc mật khẩu.' : r.error.message; b.disabled = false; b.textContent = 'Vào'; return; }
           document.body.removeChild(m); resolve();
         }, function (e) { err.hidden = false; err.textContent = 'Không kết nối được. Kiểm tra mạng.'; b.disabled = false; b.textContent = 'Vào'; });
       };
@@ -223,7 +225,7 @@
     },
     importAll: async function (obj) {
       if (!obj || obj.app !== 'quan-ly-van-ban' || !obj.vanban) throw new Error('Không phải file sao lưu của ứng dụng này');
-      var cols = ['id', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau', 'anh', 'bc', 'da_xoa', 'tao_luc'];
+      var cols = ['id', 'so_van_ban', 'ngay_van_ban', 'ngay_nhan', 'trich_yeu', 'noi_dung', 'y_kien_chi_dao', 'can_bo', 'han', 'ket_qua', 'ghi_chu_ket_qua', 'loai', 'ky_sau', 'anh', 'bc', 'da_xoa', 'tao_luc', 'xong_luc'];
       var rows = obj.vanban.map(function (d) { var o = {}; cols.forEach(function (k) { if (d[k] !== undefined) o[k] = d[k]; }); return o; });
       for (var i = 0; i < rows.length; i += 50) {
         var part = rows.slice(i, i + 50);
