@@ -414,6 +414,14 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       <div class="tip" id="stMail"></div>
       <button class="btn block" id="stTest">Gửi thử email nhắc việc</button>
     </div>
+    <div class="group g-set" id="grpPush" hidden>
+      <h4>Thông báo đẩy</h4>
+      <div class="tip" id="pushState"></div>
+      <button class="btn primary block" id="pushOn" hidden>Bật thông báo nhắc việc trên máy này</button>
+      <button class="btn block" id="pushTest" hidden>Gửi thông báo thử</button>
+      <button class="btn block" id="pushOff" hidden>Tắt thông báo trên máy này</button>
+      <div class="tip">Mỗi sáng 7h30 điện thoại nhận thông báo các việc quá hạn và sắp đến hạn trong 3 ngày, kể cả khi không mở ứng dụng. Cán bộ chỉ nhận việc của mình.</div>
+    </div>
     <div class="group g-cb" id="grpCb">
       <h4>Danh sách cán bộ</h4>
       <div class="chips" id="stCb"></div>
@@ -616,6 +624,7 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
   function load() {
     return Promise.all([rpc('getAll'), rpc('getLoai').catch(function () { return null; }), rpc('getCanBo').catch(function () { return null; }), rpc('getInfo').catch(function () { return {}; })]).then(function (r) {
       var inf = r[3] || {}, first = !me.loaded;
+      if (first) setTimeout(syncPush, 1500);
       me.role = inf.role || ''; me.ten = inf.ten || ''; me.account = inf.account || ''; me.loaded = true;
       if (first && me.role === 'can_bo' && me.ten) F.tab = 'mine';
       docs = JSON.parse(JSON.stringify(r[0])); docs.forEach(function (d) { if (!d.loai) d.loai = 'vb'; if (!d.bc) d.bc = []; });
@@ -1065,6 +1074,69 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
       else toast(failed ? failed + ' file chưa lưu được' : 'Đã lưu kết quả');
     }).catch(function (e) { btn.disabled = false; btn.textContent = done.mode === 'done' ? 'Hoàn thành' : 'Lưu ảnh / file'; toast(e.message); });
   }
+  // ---- thông báo đẩy ----
+  function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function isStandalone() { return !!(navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)); }
+  function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function keyBytes(b64) {
+    var p = '='.repeat((4 - b64.length % 4) % 4), s = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')), o = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) o[i] = s.charCodeAt(i);
+    return o;
+  }
+  function getSub() {
+    if (!pushSupported()) return Promise.resolve(null);
+    return navigator.serviceWorker.getRegistration().then(function (r) { return r ? r.pushManager.getSubscription() : null; }).catch(function () { return null; });
+  }
+  function refreshPush() {
+    var on = window.FEATURES && window.FEATURES.push;
+    $('grpPush').hidden = !on;
+    if (!on) return Promise.resolve();
+    if (!pushSupported()) {
+      $('pushState').textContent = isIOS() && !isStandalone()
+        ? 'Trên iPhone: bấm nút Chia sẻ của Safari, chọn "Thêm vào Màn hình chính", rồi mở ứng dụng từ biểu tượng mới tạo và bật thông báo ở đây.'
+        : 'Trình duyệt này không hỗ trợ thông báo đẩy.';
+      $('pushOn').hidden = $('pushOff').hidden = $('pushTest').hidden = true;
+      return Promise.resolve();
+    }
+    return getSub().then(function (sub) {
+      var enabled = !!sub && Notification.permission === 'granted';
+      $('pushState').textContent = enabled ? 'Đã bật thông báo trên máy này.' : (Notification.permission === 'denied' ? 'Thông báo đang bị chặn. Hãy cho phép thông báo cho trang này trong cài đặt của trình duyệt hoặc điện thoại.' : 'Chưa bật thông báo trên máy này.');
+      $('pushOn').hidden = enabled; $('pushOff').hidden = $('pushTest').hidden = !enabled;
+    });
+  }
+  function enablePush() {
+    var btn = $('pushOn'); btn.disabled = true;
+    return Notification.requestPermission().then(function (perm) {
+      if (perm !== 'granted') throw new Error('Bạn chưa cho phép thông báo.');
+      return rpc('pushInfo');
+    }).then(function (info) {
+      if (!info || !info.publicKey) throw new Error('Chưa cấu hình khóa thông báo.');
+      return navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+        return reg.pushManager.getSubscription().then(function (old) { return old || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(info.publicKey) }); });
+      });
+    }).then(function (sub) { return rpc('pushSave', [sub.toJSON()]); })
+      .then(function () { toast('Đã bật thông báo nhắc việc'); return refreshPush(); })
+      .catch(function (e) { toast((e && e.message) || 'Không bật được thông báo'); })
+      .then(function () { btn.disabled = false; });
+  }
+  function disablePush() {
+    return getSub().then(function (sub) {
+      if (!sub) return null;
+      var ep = sub.endpoint;
+      return sub.unsubscribe().then(function () { return rpc('pushRemove', [ep]); });
+    }).then(function () { toast('Đã tắt thông báo trên máy này'); return refreshPush(); }).catch(function (e) { toast((e && e.message) || 'Không tắt được'); });
+  }
+  function testPush() {
+    toast('Đang gửi thông báo thử...');
+    return rpc('pushTest').then(function (r) {
+      toast(r.sent ? 'Đã gửi. Vài giây nữa thông báo sẽ hiện lên.' : (r.removed ? 'Đăng ký thông báo của máy này đã hết hạn. Hãy tắt rồi bật lại.' : 'Chưa gửi được' + (r.errors && r.errors[0] ? ': ' + r.errors[0] : '')));
+    }).catch(function (e) { toast((e && e.message) || 'Không gửi được'); });
+  }
+  // Mở ứng dụng: nếu máy đã bật thông báo thì đồng bộ lại đăng ký (địa chỉ nhận có thể đổi)
+  function syncPush() {
+    if (!(window.FEATURES && window.FEATURES.push) || !pushSupported() || Notification.permission !== 'granted') return;
+    getSub().then(function (sub) { if (sub) rpc('pushSave', [sub.toJSON()]).catch(function () { }); }).catch(function () { });
+  }
   function openTrash() {
     show('scrTrash');
     return rpc('getTrash').then(function (l) {
@@ -1248,11 +1320,12 @@ label.f,.f{display:grid;gap:5px;font-size:13px;color:var(--muted);font-weight:60
         $('stMail').textContent = i.email ? 'Email nhắc việc gửi mỗi sáng lúc ' + i.gio + 'h tới: ' + i.email + ' (nhắc trước ' + i.soNgay + ' ngày, sửa trong Code.gs).' : 'Việc quá hạn và sắp đến hạn hiện ở khung nhắc màu đầu trang mỗi lần mở ứng dụng.';
         $('stNote').textContent = '';
       }).catch(function () { });
-      $('stCsv').hidden = !window.SAVE_FILE; renderLoaiList(); renderStCb();
+      $('stCsv').hidden = !window.SAVE_FILE; renderLoaiList(); renderStCb(); refreshPush();
       show('scrSet');
     };
     $('stDays').onchange = function () { store('remDays', String(parseInt(this.value, 10) || 0)); renderAll(); };
     $('stTest').onclick = function () { rpc('guiThuNhacViec').then(function (m) { toast(m); }).catch(function (e) { toast(e.message); }); };
+    $('pushOn').onclick = enablePush; $('pushOff').onclick = disablePush; $('pushTest').onclick = testPush;
     $('stTrash').onclick = function () { openTrash(); };
     var doBackup = function (full) {
       toast(full ? 'Đang gom cả ảnh và file, có thể mất vài phút...' : 'Đang sao lưu...');

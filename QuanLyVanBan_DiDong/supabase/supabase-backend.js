@@ -4,7 +4,7 @@
   var T = 'vanban', C = 'cauhinh', BUCKET = 'tep';
   var sb = null, initP = null, rtTimer = null;
   window.PROOF_MAX_BYTES = 10 * 1024 * 1024;
-  window.FEATURES = { trash: true, audit: true, backup: true };
+  window.FEATURES = { trash: true, audit: true, backup: true, push: true };
 
   function cfg() {
     var c = window.SUPABASE_CONFIG || {};
@@ -183,6 +183,30 @@
       if (!KQ[k]) throw new Error('Kết quả không hợp lệ');
       await upd(id, { ket_qua: k, sua_luc: now() });
       return true;
+    },
+    pushInfo: async function () { return { publicKey: (window.SUPABASE_CONFIG || {}).vapidPublicKey || '' }; },
+    pushSave: async function (sub) {
+      if (!sub || !sub.endpoint || !sub.keys) throw new Error('Đăng ký thông báo không hợp lệ');
+      var row = { endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth, ua: String(navigator.userAgent || '').slice(0, 200) };
+      await run(function () { return sb.from('dang_ky_push').upsert(row, { onConflict: 'endpoint' }); });
+      return true;
+    },
+    pushRemove: async function (endpoint) {
+      await run(function () { return sb.from('dang_ky_push').delete().eq('endpoint', endpoint); });
+      return true;
+    },
+    pushTest: async function () {
+      await init();
+      var c = cfg(), ses = await sb.auth.getSession();
+      if (!ses.data || !ses.data.session) throw new Error('Chưa đăng nhập');
+      var res = await fetch(c.url + '/functions/v1/gui-nhac-viec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: c.anonKey, Authorization: 'Bearer ' + ses.data.session.access_token },
+        body: JSON.stringify({ test: true })
+      });
+      var j = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(j.error || ('Lỗi ' + res.status));
+      return j;
     },
     exportAll: async function (withFiles) {
       var rows = await run(function () { return sb.from(T).select('*'); });
