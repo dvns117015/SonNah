@@ -78,6 +78,8 @@ var API_ = {
     var s = PropertiesService.getScriptProperties().getProperty('LOAI');
     try { var l = JSON.parse(s); return (l && l.length) ? l : null; } catch (e) { return null; }
   },
+  getCoQuan: function () { return PropertiesService.getScriptProperties().getProperty('COQUAN') || ''; },
+  saveCoQuan: function (name) { PropertiesService.getScriptProperties().setProperty('COQUAN', String(name || '').trim().slice(0, 120)); return true; },
   getCanBo: function () {
     var s = PropertiesService.getScriptProperties().getProperty('CANBO');
     try { var l = JSON.parse(s); return (l && l.length) ? l : null; } catch (e) { return null; }

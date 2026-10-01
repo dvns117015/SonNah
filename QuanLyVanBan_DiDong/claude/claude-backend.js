@@ -76,6 +76,10 @@
     getLoai: function () {
       return need().doc('config/loai').get().then(function (s) { var l = s.exists && s.data().list; return (l && l.length) ? JSON.parse(JSON.stringify(l)) : null; });
     },
+    getCoQuan: function () {
+      return need().doc('config/coquan').get().then(function (s) { return (s.exists && s.data().name) || ''; });
+    },
+    saveCoQuan: function (name) { return need().doc('config/coquan').set({ name: String(name || '').trim().slice(0, 120) }).then(function () { return true; }); },
     getCanBo: function () {
       return need().doc('config/canbo').get().then(function (s) { var l = s.exists && s.data().list; return (l && l.length) ? JSON.parse(JSON.stringify(l)) : null; });
     },

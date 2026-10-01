@@ -231,7 +231,7 @@
         var part = rows.slice(i, i + 50);
         await run(function () { return sb.from(T).upsert(part, { onConflict: 'id' }); });
       }
-      var cf = (obj.cauhinh || []).filter(function (c) { return c && (c.key === 'loai' || c.key === 'canbo'); });
+      var cf = (obj.cauhinh || []).filter(function (c) { return c && (c.key === 'loai' || c.key === 'canbo' || c.key === 'coquan'); });
       if (cf.length) await run(function () { return sb.from(C).upsert(cf.map(function (c) { return { key: c.key, value: c.value }; })); });
       var n = 0, files = obj.files || {};
       for (var p in files) {
@@ -262,6 +262,8 @@
     getLoai: function () { return getCfg('loai'); },
     saveLoai: async function (list) { return setCfg('loai', cleanLoai(list)); },
     getCanBo: function () { return getCfg('canbo'); },
+    getCoQuan: async function () { var v = await getCfg('coquan'); return typeof v === 'string' ? v : ''; },
+    saveCoQuan: async function (name) { return setCfg('coquan', String(name || '').trim().slice(0, 120)); },
     saveCanBo: async function (list) {
       if (!list || list.length > 300) throw new Error('Danh sách cán bộ không hợp lệ');
       var seen = {}, clean = [];

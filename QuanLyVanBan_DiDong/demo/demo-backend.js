@@ -38,6 +38,8 @@
       db.push(o); save(); return { id: o.id, created: true };
     },
     getLoai: function () { try { var l = JSON.parse(localStorage.getItem(KEY + '-loai')); if (l && l.length) return l; } catch (e) { } return [{ id: 'vb', name: 'Văn bản thường', ky: '' }, { id: 'bctuan', name: 'Báo cáo tuần', ky: 'tuan', ngay: 5, auto: true, truoc: 10, can_bo: 'Trần Thị Bình' }, { id: 'bcthang', name: 'Báo cáo tháng', ky: 'thang', ngay: 0 }, { id: 'bcquy', name: 'Báo cáo quý', ky: 'quy', thang: 3, ngay: 20 }, { id: 'bc6thang', name: 'Báo cáo 6 tháng', ky: '6thang', thang: 6, ngay: 0 }, { id: 'bcnam', name: 'Báo cáo năm', ky: 'nam', thang: 12, ngay: 0 }]; },
+    getCoQuan: function () { try { return localStorage.getItem(KEY + '-coquan') || ''; } catch (e) { return ''; } },
+    saveCoQuan: function (n) { try { localStorage.setItem(KEY + '-coquan', n); } catch (e) { } return true; },
     getCanBo: function () { try { var l = JSON.parse(localStorage.getItem(KEY + '-canbo')); if (l && l.length) return l; } catch (e) { } return ['Nguyễn Văn An', 'Trần Thị Bình', 'Lê Minh Cường', 'Phạm Thu Hà']; },
     saveCanBo: function (list) { try { localStorage.setItem(KEY + '-canbo', JSON.stringify(list)); } catch (e) { } return true; },
     saveLoai: function (list) { try { localStorage.setItem(KEY + '-loai', JSON.stringify(list)); } catch (e) { } return true; },
