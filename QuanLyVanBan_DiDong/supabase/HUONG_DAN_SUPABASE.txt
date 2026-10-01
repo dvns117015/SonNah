@@ -39,6 +39,15 @@ PHẦN B. ĐƯA TRANG WEB LÊN GITHUB PAGES (khoảng 5 phút)
 3. Chờ 1 đến 2 phút, địa chỉ hiện ở đầu trang Pages, dạng https://<tên-github>.github.io/SonNah/
 4. Gửi link cho cán bộ. Mở link > đăng nhập > menu trình duyệt > "Thêm vào màn hình chính".
 
+GIAO DIỆN (HƯỚNG A, CÔNG VỤ)
+---------------------------
+  - Đầu trang: tên cơ quan, "Sổ theo dõi văn bản", ngày hôm nay và người đang dùng. Đặt tên cơ quan ở
+    Tài khoản > Tên cơ quan (văn thư, quản trị).
+  - 4 ô số: Quá hạn, Đến hạn, Đang xử lý, Đã xong. Chạm để lọc, chạm lại để bỏ lọc.
+  - Danh sách chia nhóm: Quá hạn, Đến hạn, Còn hạn, Chưa đặt hạn, Đã xong; ô ngày hạn bên trái mỗi dòng.
+  - Thanh dưới cùng: Văn bản, Tổng quan, Thêm (nút đỏ), Tài khoản. Nút cây bút trên đầu trang: danh sách ký nhận.
+  - Chi tiết: dải màu báo hạn (đỏ khi quá hạn), nút "Hoàn thành và đính kèm kết quả".
+
 ĐĂNG NHẬP BẰNG TÊN NGẮN
 -----------------------
   - Ở màn hình đăng nhập có thể gõ tên ngắn thay cho email, ví dụ "Son". Ứng dụng tự hiểu là son@vanban.local.
